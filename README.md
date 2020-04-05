@@ -1,27 +1,39 @@
-[![Build Status](https://travis-ci.com/eflem00/koa-boilerplate.svg?branch=master)](https://travis-ci.com/eflem00/koa-boilerplate) [![Coverage Status](https://coveralls.io/repos/github/eflem00/koa-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/eflem00/koa-boilerplate?branch=master) [![dependencies Status](https://david-dm.org/eflem00/koa-boilerplate/status.svg)](https://david-dm.org/eflem00/koa-boilerplate) [![devDependencies Status](https://david-dm.org/eflem00/koa-boilerplate/dev-status.svg)](https://david-dm.org/eflem00/koa-boilerplate?type=dev)
+[![Build Status](https://travis-ci.com/eflem00/koa-boilerplate.svg?branch=master)](https://travis-ci.com/eflem00/koa-boilerplate) [![Coverage Status](https://coveralls.io/repos/github/eflem00/koa-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/eflem00/koa-boilerplate?branch=master) [![dependencies Status](https://david-dm.org/eflem00/koa-boilerplate/status.svg)](https://david-dm.org/eflem00/koa-boilerplate) [![devDependencies Status](https://david-dm.org/eflem00/koa-boilerplate/dev-status.svg)](https://david-dm.org/eflem00/koa-boilerplate?type=dev) [![License](https://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
 
 # Koa Boilerplate
 
-### A Fully optimized REST API Built using a Koa + Typescript + Postgres stack
+## A Fully Customized REST API Built Using a Koa + Typescript + Postgres Stack
 
-### **Features**
+## **Business Domain Agnostic**
 
+- Remove example code with a single command
+
+## **Features**
+
+- Generator scripts to add controllers, middleware, services and models with a single command
 - Dependency Injection through Awilix
 - Connection Pooling
 - ORM Configuration through TypeORM
 - Logging through Winston
-- Containerized through Docker
+- Dockerized
+- Environment configurable
 - Full unit, integration and test coverage through Jest
-- CI Pipeline configuration through Travis
+- CI/CD Pipelines through Travis
 
-### **Prerequisites**
+## **Prerequisites**
 
 - Node v12+
 - Npm v6+
 - Postgres v12+
 - Docker
 
-### **Local Setup**
+## **Table of Contents**
+
+- [Local Setup](#local)
+- [Deployment](#deployment)
+- [License](#license)
+
+## **Local**
 
 1.  **Fork, Clone and Install**
 
@@ -60,8 +72,13 @@
     npm run commit
     ```
 
-### **Deployment Setup**
+## **Deployment**
 
-TODO
+- TODO
 
-### Inspired By [React Boilerplate](https://github.com/react-boilerplate/react-boilerplate)
+## **Inspired By [React Boilerplate](https://github.com/react-boilerplate/react-boilerplate)**
+
+## **License**
+
+- **[MIT license](http://opensource.org/licenses/mit-license.php)**
+- Copyright 2015 © Evan Gordon Fleming.
