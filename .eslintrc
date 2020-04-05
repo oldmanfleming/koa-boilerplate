@@ -1,25 +1,21 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": "tsconfig.json",
-    "sourceType": "module"
-  },
-  "plugins": ["@typescript-eslint"],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
-  "rules": {
-    "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/typedef": [
-      "error",
-      {
-        "arrayDestructuring": true,
-        "objectDestructuring": true,
-        "variableDeclaration": true
-      }
-    ]
-  }
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint"],
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"rules": {
+		"@typescript-eslint/no-explicit-any": 0,
+		"@typescript-eslint/typedef": [
+			"error",
+			{
+				"arrayDestructuring": true,
+				"objectDestructuring": true,
+				"variableDeclaration": true
+			}
+		]
+	}
 }
