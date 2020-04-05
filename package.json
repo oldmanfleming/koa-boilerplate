@@ -24,12 +24,20 @@
 	},
 	"homepage": "https://github.com/eflem00/koa-boilerplate#readme",
 	"dependencies": {
-		"koa": "^2.11.0"
+		"awilix": "^4.2.5",
+		"awilix-koa": "^4.0.0",
+		"dotenv": "^8.2.0",
+		"http-status-codes": "^1.4.0",
+		"koa": "^2.11.0",
+		"koa-bodyparser": "^4.3.0",
+		"pg": "^8.0.0",
+		"winston": "^3.2.1"
 	},
 	"devDependencies": {
 		"@types/jest": "^25.2.1",
 		"@types/koa": "^2.11.3",
 		"@types/node": "^13.11.0",
+		"@types/pg": "^7.14.3",
 		"@typescript-eslint/eslint-plugin": "^2.26.0",
 		"@typescript-eslint/parser": "^2.26.0",
 		"coveralls": "^3.0.11",
