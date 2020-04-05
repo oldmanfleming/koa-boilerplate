@@ -62,10 +62,6 @@
 				"statements": 100
 			}
 		},
-		"coverageReporters": [
-			"text",
-			"text-summary"
-		],
 		"testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
 	}
 }
