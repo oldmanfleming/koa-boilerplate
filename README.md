@@ -14,4 +14,54 @@
 - Full unit, integration and test coverage through Jest
 - CI Pipeline configuration through Travis
 
+### **Prerequisites**
+
+- Node v12+
+- Npm v6+
+- Postgres v12+
+- Docker
+
+### **Local Setup**
+
+1.  **Fork, Clone and Install**
+
+    Fork your own copy of this repo
+
+    ```
+    git clone <your fork>
+
+    cd koa-boilerplate
+
+    npm install
+    ```
+
+2.  **Environment and DB setup**
+
+    Add a .env file in the root of the directory with the following environment variables (replace <...> with your specific information)
+
+    ```
+    ENV=dev
+    DB_USER=<your Postgres user>
+    DB_PASS=<your Postgres user's password>
+    DB_TARGET=<the location of your postgres db e.g http://localhost:5432>
+    ```
+
+    Run this SQL query on your local db to create the example tables
+
+    ```
+    TODO
+    ```
+
+3.  **Test your local setup works**
+
+    This should finish successfully to know you have a working instance locally
+
+    ```
+    npm run commit
+    ```
+
+### **Deployment Setup**
+
+TODO
+
 ### Inspired By [React Boilerplate](https://github.com/react-boilerplate/react-boilerplate)
