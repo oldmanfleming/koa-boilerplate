@@ -10,7 +10,8 @@
 		"coveralls": "cat ./coverage/lcov.info | coveralls",
 		"lint": "eslint . --ext .ts",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
-		"test": "jest"
+		"test": "jest --collectCoverage",
+		"test:watch": "jest --watchAll"
 	},
 	"repository": {
 		"type": "git",
@@ -41,27 +42,5 @@
 		"ts-jest": "^25.3.1",
 		"ts-node": "^8.8.1",
 		"typescript": "^3.8.3"
-	},
-	"jest": {
-		"moduleFileExtensions": [
-			"js",
-			"ts"
-		],
-		"collectCoverage": true,
-		"collectCoverageFrom": [
-			"./src/**/*.ts"
-		],
-		"transform": {
-			"\\.ts$": "ts-jest"
-		},
-		"coverageThreshold": {
-			"global": {
-				"branches": 100,
-				"functions": 100,
-				"lines": 100,
-				"statements": 100
-			}
-		},
-		"testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
 	}
 }
