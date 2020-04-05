@@ -7,6 +7,8 @@ node_js:
 script:
   - npm run commit
 
+after_success: 'npm run coveralls'
+
 cache:
   directories:
     - node_modules

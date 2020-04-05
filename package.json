@@ -1,69 +1,71 @@
 {
-  "name": "koa-boilerplate",
-  "version": "1.0.0",
-  "description": "Koa Boilerplate",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "clean": "rimraf ./build",
-    "commit": "run-s clean build lint test",
-    "lint": "eslint . --ext .ts",
-    "start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eflem00/koa-boilerplate.git"
-  },
-  "author": "Evan Fleming",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/eflem00/koa-boilerplate/issues"
-  },
-  "homepage": "https://github.com/eflem00/koa-boilerplate#readme",
-  "dependencies": {
-    "koa": "^2.11.0"
-  },
-  "devDependencies": {
-    "@types/jest": "^25.2.1",
-    "@types/koa": "^2.11.3",
-    "@types/node": "^13.11.0",
-    "@typescript-eslint/eslint-plugin": "^2.26.0",
-    "@typescript-eslint/parser": "^2.26.0",
-    "eslint": "^6.8.0",
-    "jest": "^25.2.7",
-    "nodemon": "^2.0.2",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2",
-    "supertest": "^4.0.2",
-    "ts-jest": "^25.3.1",
-    "ts-node": "^8.8.1",
-    "typescript": "^3.8.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "ts"
-    ],
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "./src/**/*.ts"
-    ],
-    "transform": {
-      "\\.ts$": "ts-jest"
-    },
-    "coverageThreshold": {
-      "global": {
-        "branches": 100,
-        "functions": 100,
-        "lines": 100,
-        "statements": 100
-      }
-    },
-    "coverageReporters": [
-      "text",
-      "text-summary"
-    ],
-    "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
-  }
+	"name": "koa-boilerplate",
+	"version": "1.0.0",
+	"description": "Koa Boilerplate",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc",
+		"clean": "rimraf ./build",
+		"commit": "run-s clean build lint test",
+		"coveralls": "cat ./coverage/lcov.info | coveralls",
+		"lint": "eslint . --ext .ts",
+		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
+		"test": "jest"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/eflem00/koa-boilerplate.git"
+	},
+	"author": "Evan Fleming",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/eflem00/koa-boilerplate/issues"
+	},
+	"homepage": "https://github.com/eflem00/koa-boilerplate#readme",
+	"dependencies": {
+		"koa": "^2.11.0"
+	},
+	"devDependencies": {
+		"@types/jest": "^25.2.1",
+		"@types/koa": "^2.11.3",
+		"@types/node": "^13.11.0",
+		"@typescript-eslint/eslint-plugin": "^2.26.0",
+		"@typescript-eslint/parser": "^2.26.0",
+		"coveralls": "^3.0.11",
+		"eslint": "^6.8.0",
+		"jest": "^25.2.7",
+		"nodemon": "^2.0.2",
+		"npm-run-all": "^4.1.5",
+		"rimraf": "^3.0.2",
+		"supertest": "^4.0.2",
+		"ts-jest": "^25.3.1",
+		"ts-node": "^8.8.1",
+		"typescript": "^3.8.3"
+	},
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"ts"
+		],
+		"collectCoverage": true,
+		"collectCoverageFrom": [
+			"./src/**/*.ts"
+		],
+		"transform": {
+			"\\.ts$": "ts-jest"
+		},
+		"coverageThreshold": {
+			"global": {
+				"branches": 100,
+				"functions": 100,
+				"lines": 100,
+				"statements": 100
+			}
+		},
+		"coverageReporters": [
+			"text",
+			"text-summary"
+		],
+		"testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
+	}
 }
