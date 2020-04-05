@@ -1,5 +1,12 @@
 language: node_js
+
 node_js:
-  - 12
+  - 'node'
+  - 'lts/*'
+
 script:
   - npm run commit
+
+cache:
+  directories:
+    - node_modules
