@@ -2,7 +2,7 @@
 
 # Koa Boilerplate
 
-### A Fully optimized Koa + Typescript + Postgres stack
+### A Fully optimized REST API Built using a Koa + Typescript + Postgres stack
 
 ### **Features**
 
