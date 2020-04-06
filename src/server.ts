@@ -1,4 +1,4 @@
-import Koa from 'Koa';
+import Koa from 'koa';
 import { createApp } from './app';
 
 (async () => {
