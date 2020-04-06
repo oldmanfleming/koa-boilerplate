@@ -1,14 +1,35 @@
-import app from '../src/app';
+import { createApp } from '../src/app';
+import pg from 'pg';
+import dotenv from 'dotenv';
+import sinon from 'sinon';
 
-const mockListen: any = jest.fn();
-app.listen = mockListen;
+describe('App', () => {
+	const sandbox: any = sinon.createSandbox();
 
-beforeEach(() => {
-	mockListen.mockReset();
-});
+	let mockPool: any;
+	let mockConfig: any;
 
-test('Server works', async () => {
-	require('../src/server');
-	expect(mockListen.mock.calls.length).toBe(1);
-	expect(mockListen.mock.calls[0][0]).toBe(process.env.PORT || 3000);
+	beforeEach(() => {
+		mockPool = sandbox.spy(pg, 'Pool');
+		mockConfig = sandbox.spy(dotenv, 'config');
+		process.env.NODE_ENV = 'dev';
+	});
+
+	afterEach(() => {
+		sandbox.restore();
+		delete process.env.NODE_ENV;
+	});
+
+	test('Does not throw in base case', async () => {
+		await createApp();
+		expect(mockConfig.callCount).toBe(1);
+		expect(mockPool.callCount).toBe(1);
+	});
+
+	test('Doesnt load env variables in prod', async () => {
+		process.env.NODE_ENV = 'prod';
+		await createApp();
+		expect(mockConfig.callCount).toBe(0);
+		expect(mockPool.callCount).toBe(1);
+	});
 });

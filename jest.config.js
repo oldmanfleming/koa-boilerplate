@@ -1,6 +1,6 @@
 module.exports = {
 	moduleFileExtensions: ['js', 'ts'],
-	collectCoverageFrom: ['./src/**/*.ts'],
+	collectCoverageFrom: ['./src/**/*.ts', '!./src/server.ts'],
 	transform: {
 		'\\.ts$': 'ts-jest',
 	},

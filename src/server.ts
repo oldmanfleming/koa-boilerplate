@@ -1,5 +1,5 @@
 import Koa from 'Koa';
-import createApp from './app';
+import { createApp } from './app';
 
 (async () => {
 	try {

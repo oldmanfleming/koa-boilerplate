@@ -7,7 +7,7 @@ import bodyParser from 'koa-bodyparser';
 import dotenv from 'dotenv';
 import RequestMiddleware from './middleware/RequestMiddleware';
 
-export default async function (): Promise<Koa> {
+async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
 	if (process.env.NODE_ENV !== 'prod') {
@@ -51,3 +51,5 @@ export default async function (): Promise<Koa> {
 
 	return app;
 }
+
+export { createApp };

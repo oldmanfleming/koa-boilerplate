@@ -20,7 +20,7 @@ export default function ({ pool, logger }: { pool: Pool; logger: Logger }) {
 			ctx.status = BAD_REQUEST;
 			ctx.body = { message: 'invalid request' };
 		} finally {
-			logger.info(`${ctx.request.path} ${ctx.response.status}`);
+			logger.info(`${ctx.request.path} ${ctx.status}`);
 			if (client) {
 				client.release();
 			}
