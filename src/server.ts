@@ -1,6 +1,8 @@
 import Koa from 'koa';
 import { createApp } from './app';
 
+import 'reflect-metadata';
+
 (async () => {
 	try {
 		const port: string | number = process.env.PORT || 3000;

@@ -15,7 +15,7 @@ describe('Request Middleware', () => {
 	};
 	const mockClient: any = { release: jest.fn() };
 	const mockNext: any = jest.fn();
-	const middleware: Function = RequestMiddleware({ pool: mockPool, logger: mockLogger });
+	const middleware: Function = RequestMiddleware({ logger: mockLogger });
 
 	beforeEach(() => {
 		mockContext.state.container.register.mockReset();

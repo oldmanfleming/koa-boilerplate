@@ -1,11 +1,13 @@
 import Koa from 'koa';
-import { Pool } from 'pg';
 import { createContainer, AwilixContainer, asValue } from 'awilix';
 import { scopePerRequest, loadControllers, inject } from 'awilix-koa';
 import { createLogger, Logger, format, transports } from 'winston';
 import bodyParser from 'koa-bodyparser';
 import dotenv from 'dotenv';
+import { createConnection, Connection, getCustomRepository } from 'typeorm';
+
 import RequestMiddleware from './middleware/RequestMiddleware';
+import { PhotoRepository } from './repositories/PhotoRepository';
 
 async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
@@ -14,14 +16,18 @@ async function createApp(): Promise<Koa> {
 		dotenv.config();
 	}
 
-	const pool: Pool = new Pool({
+	const connection: Connection = await createConnection({
+		type: 'postgres',
 		host: process.env.DB_HOST,
-		user: process.env.DB_USER,
+		port: 5432,
+		username: process.env.DB_USER,
 		password: process.env.DB_PASS,
-		max: 20,
-		idleTimeoutMillis: 30000,
-		connectionTimeoutMillis: 2000,
+		database: 'postgres',
+		entities: [__dirname + '/models/*.{ts,js}'],
+		synchronize: true, //TODO: Remove
 	});
+
+	const photoRepository: PhotoRepository = getCustomRepository(PhotoRepository);
 
 	const logger: Logger = createLogger({
 		transports: [
@@ -32,22 +38,16 @@ async function createApp(): Promise<Koa> {
 	});
 
 	const container: AwilixContainer = createContainer().register({
-		pool: asValue(pool),
 		logger: asValue(logger),
+		connection: asValue(connection),
+		photoRepository: asValue(photoRepository),
 	});
-
-	// container.loadModules(['services/*.ts'], {
-	// 	formatName: 'camelCase',
-	// 	resolverOptions: {
-	// 		lifetime: Lifetime.SCOPED,
-	// 	},
-	// });
 
 	app
 		.use(bodyParser())
 		.use(scopePerRequest(container))
 		.use(inject(RequestMiddleware))
-		.use(loadControllers('controllers/*.ts', { cwd: __dirname }));
+		.use(loadControllers('controllers/*.{ts,js}', { cwd: __dirname }));
 
 	return app;
 }
