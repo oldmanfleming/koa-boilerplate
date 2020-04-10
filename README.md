@@ -4,7 +4,7 @@
 
 ## A Fully Customized REST API Built Using a Koa + Typescript + Postgres Stack
 
-## **Business Domain Agnostic**
+## **Business Domain Agnostic** 
 
 - Remove example code with a single command
 
