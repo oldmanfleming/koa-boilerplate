@@ -24,7 +24,7 @@ async function createApp(): Promise<Koa> {
 		password: process.env.DB_PASS,
 		database: process.env.DB_TARGET,
 		entities: [__dirname + '/models/*.{ts,js}'],
-		synchronize: true, //TODO: Remove
+		synchronize: true, //TODO: Remove 
 	});
 
 	const photoRepository: PhotoRepository = getCustomRepository(PhotoRepository);
