@@ -1,21 +1,21 @@
 import { route, GET } from 'awilix-koa';
 import { OK } from 'http-status-codes';
 import { Context } from 'koa';
-import { PoolClient } from 'pg';
+import { Connection } from 'typeorm';
 
 export default class HealthCheckController {
-	private _client: PoolClient;
+	private _connection: Connection;
 
-	constructor({ client }: { client: PoolClient }) {
-		this._client = client;
+	constructor({ connection }: { connection: Connection }) {
+		this._connection = connection;
 	}
 
 	@route('/')
 	@route('/health')
 	@GET()
 	async health(ctx: Context) {
-		await this._client.query(`
-      SELECT NOW() as now
+		await this._connection.query(`
+      SELECT NOW()
     `);
 		ctx.status = OK;
 	}
