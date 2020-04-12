@@ -1,5 +1,5 @@
-import { Context, Next } from 'koa';
-import { BAD_REQUEST } from 'http-status-codes';
+import { Context, Next, } from 'koa';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
 import { Logger } from 'winston';
 
 export default function ({ logger }: { logger: Logger }) {
@@ -7,9 +7,14 @@ export default function ({ logger }: { logger: Logger }) {
 		try {
 			await next();
 		} catch (ex) {
-			logger.error('caught exception ', ex);
-			ctx.status = BAD_REQUEST;
-			ctx.body = { message: 'Invalid request' };
+			if (ex.status && ex.status !== INTERNAL_SERVER_ERROR) {
+				ctx.status = ex.status;
+				ctx.body = { message: ex.message };
+			} else {
+				logger.error('Caught Exception: ', ex);
+				ctx.status = BAD_REQUEST;
+				ctx.body = { message: 'Invalid request' };
+			}
 		} finally {
 			logger.info(`${ctx.request.method} ${ctx.request.path} ${ctx.status}`);
 		}

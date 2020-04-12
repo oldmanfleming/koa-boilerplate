@@ -1,16 +1,16 @@
 import { createApp } from '../src/app';
-import pg from 'pg';
+import * as typeorm from 'typeorm';
 import dotenv from 'dotenv';
 import sinon from 'sinon';
 
 describe('App', () => {
 	const sandbox: any = sinon.createSandbox();
-
-	let mockPool: any;
+	let mockConnection: any;
 	let mockConfig: any;
 
 	beforeEach(() => {
-		mockPool = sandbox.spy(pg, 'Pool');
+		sandbox.stub(typeorm, 'getCustomRepository');
+		mockConnection = sandbox.stub(typeorm, 'createConnection');
 		mockConfig = sandbox.spy(dotenv, 'config');
 		process.env.NODE_ENV = 'dev';
 	});
@@ -23,13 +23,13 @@ describe('App', () => {
 	test('Does not throw in base case', async () => {
 		await createApp();
 		expect(mockConfig.callCount).toBe(1);
-		expect(mockPool.callCount).toBe(1);
+		expect(mockConnection.callCount).toBe(1);
 	});
 
 	test('Doesnt load env variables in prod', async () => {
 		process.env.NODE_ENV = 'prod';
 		await createApp();
 		expect(mockConfig.callCount).toBe(0);
-		expect(mockPool.callCount).toBe(1);
+		expect(mockConnection.callCount).toBe(1);
 	});
 });
