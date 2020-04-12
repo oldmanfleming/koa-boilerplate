@@ -22,7 +22,7 @@ async function createApp(): Promise<Koa> {
 		port: 5432,
 		username: process.env.DB_USER,
 		password: process.env.DB_PASS,
-		database: 'postgres',
+		database: process.env.DB_TARGET,
 		entities: [__dirname + '/models/*.{ts,js}'],
 		synchronize: true, //TODO: Remove
 	});
