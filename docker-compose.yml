@@ -1,0 +1,16 @@
+version: '3'
+services:
+  database:
+    image: postgres
+    ports:
+      - '8001:5432'
+    environment:
+      POSTGRES_PASSWORD: Password1
+  web:
+    depends_on:
+      - 'database'
+    build: .
+    ports:
+      - '8000:3000'
+    environment:
+      DB_URI: postgres://postgres:Password1@database:5432/postgres
