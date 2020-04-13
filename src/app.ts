@@ -4,30 +4,32 @@ import { scopePerRequest, loadControllers, inject } from 'awilix-koa';
 import { createLogger, Logger, format, transports } from 'winston';
 import bodyParser from 'koa-bodyparser';
 import dotenv from 'dotenv';
-import { createConnection, Connection, getCustomRepository } from 'typeorm';
+import { createConnection, getCustomRepository, Connection } from 'typeorm';
 
 import RequestMiddleware from './middleware/RequestMiddleware';
 import { PhotoRepository } from './repositories/PhotoRepository';
 
-async function createApp(): Promise<Koa> {
+export async function connectWithRetry(logger: Logger): Promise<Connection> {
+	try {
+		return await createConnection({
+			type: 'postgres',
+			url: process.env.DB_URI,
+			entities: [__dirname + '/models/*.{ts,js}'],
+			synchronize: true, //TODO: Remove
+		});
+	} catch (err) {
+		logger.error('failed to connect to db on startup - retrying in 5 seconds', err);
+		await new Promise((resolve: any) => setTimeout(resolve, 5000));
+		return connectWithRetry(logger);
+	}
+}
+
+export async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
-	if (process.env.NODE_ENV !== 'prod') {
+	if (process.env.NODE_ENV !== 'production') {
 		dotenv.config();
 	}
-
-	const connection: Connection = await createConnection({
-		type: 'postgres',
-		host: process.env.DB_HOST,
-		port: 5432,
-		username: process.env.DB_USER,
-		password: process.env.DB_PASS,
-		database: process.env.DB_TARGET,
-		entities: [__dirname + '/models/*.{ts,js}'],
-		synchronize: true, //TODO: Remove 
-	});
-
-	const photoRepository: PhotoRepository = getCustomRepository(PhotoRepository);
 
 	const logger: Logger = createLogger({
 		transports: [
@@ -36,6 +38,12 @@ async function createApp(): Promise<Koa> {
 			}),
 		],
 	});
+
+	const connection: Connection = await connectWithRetry(logger);
+
+	logger.info('successfully established db connection');
+
+	const photoRepository: PhotoRepository = getCustomRepository(PhotoRepository);
 
 	const container: AwilixContainer = createContainer().register({
 		logger: asValue(logger),
@@ -51,5 +59,3 @@ async function createApp(): Promise<Koa> {
 
 	return app;
 }
-
-export { createApp };

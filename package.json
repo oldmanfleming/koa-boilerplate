@@ -6,10 +6,12 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rimraf ./build",
-		"commit": "run-s clean build lint test",
+		"commit": "run-s clean build lint test standup teardown",
 		"coveralls": "cat ./coverage/lcov.info | coveralls",
 		"lint": "eslint . --ext .ts",
+		"standup": "docker-compose up --force-recreate --build -d",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
+		"teardown": "docker-compose logs && docker-compose down",
 		"test": "jest --collectCoverage",
 		"test:watch": "jest --watchAll"
 	},

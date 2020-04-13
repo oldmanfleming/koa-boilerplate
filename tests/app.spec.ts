@@ -1,4 +1,4 @@
-import { createApp } from '../src/app';
+import { createApp, connectWithRetry } from '../src/app';
 import * as typeorm from 'typeorm';
 import dotenv from 'dotenv';
 import sinon from 'sinon';
@@ -27,9 +27,20 @@ describe('App', () => {
 	});
 
 	test('Doesnt load env variables in prod', async () => {
-		process.env.NODE_ENV = 'prod';
+		process.env.NODE_ENV = 'production';
 		await createApp();
 		expect(mockConfig.callCount).toBe(0);
 		expect(mockConnection.callCount).toBe(1);
+	});
+
+	test('Connect with rety catches exceptions and retries', async () => {
+		const clock: any = sinon.useFakeTimers();
+		mockConnection.onCall(0).throws('Could not connect');
+		mockConnection.onCall(1).returns();
+		const mockLogger: any = { error: sandbox.spy() };
+		connectWithRetry(mockLogger);
+		await clock.tickAsync(5000);
+		expect(mockConnection.callCount).toBe(2);
+		expect(mockLogger.error.callCount).toBe(1);
 	});
 });
