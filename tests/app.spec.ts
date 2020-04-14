@@ -38,9 +38,12 @@ describe('App', () => {
 		mockConnection.onCall(0).throws('Could not connect');
 		mockConnection.onCall(1).returns();
 		const mockLogger: any = { error: sandbox.spy() };
-		connectWithRetry(mockLogger);
+		const fakeConnectionOptions: any = { something: 'fake' };
+		connectWithRetry(mockLogger, fakeConnectionOptions);
 		await clock.tickAsync(5000);
 		expect(mockConnection.callCount).toBe(2);
+		expect(mockConnection.args[0][0]).toEqual(fakeConnectionOptions);
+		expect(mockConnection.args[1][0]).toEqual(fakeConnectionOptions);
 		expect(mockLogger.error.callCount).toBe(1);
 	});
 });

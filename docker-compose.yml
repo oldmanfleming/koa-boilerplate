@@ -13,4 +13,5 @@ services:
     ports:
       - '8000:3000'
     environment:
-      DB_URI: postgres://postgres:Password1@database:5432/postgres
+      TYPEORM_CONNECTION: postgres
+      TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
