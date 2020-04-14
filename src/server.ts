@@ -1,15 +1,20 @@
 import Koa from 'koa';
+import dotenv from 'dotenv';
 import { createApp } from './app';
 
 import 'reflect-metadata';
 
 (async () => {
 	try {
-		const port: string | number = process.env.PORT || 3000;
+		console.info('info: beginning bootstrap...');
+		if (process.env.NODE_ENV !== 'production') {
+			dotenv.config();
+		}
 		const app: Koa = await createApp();
+		const port: string = process.env.PORT || '3000';
 		app.listen(port);
-		console.info(`listening on localhost:${port}`);
+		console.info(`info: listening on localhost:${port}`);
 	} catch (ex) {
-		console.error('exception initiating server: ', ex);
+		console.error('error: exception bootstrapping server: ', ex);
 	}
 })();

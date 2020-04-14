@@ -3,6 +3,16 @@
 	"version": "1.0.0",
 	"description": "Koa Boilerplate",
 	"main": "index.js",
+	"author": "Evan Fleming",
+	"license": "MIT",
+	"homepage": "https://github.com/eflem00/koa-boilerplate#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/eflem00/koa-boilerplate.git"
+	},
+	"bugs": {
+		"url": "https://github.com/eflem00/koa-boilerplate/issues"
+	},
 	"scripts": {
 		"build": "tsc",
 		"clean": "rimraf ./build",
@@ -18,16 +28,65 @@
 		"test": "jest --collectCoverage",
 		"test:watch": "jest --watchAll"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/eflem00/koa-boilerplate.git"
+	"jest": {
+		"moduleFileExtensions": [
+			"js",
+			"ts"
+		],
+		"collectCoverageFrom": [
+			"./src/**/*.ts",
+			"!./src/server.ts"
+		],
+		"transform": {
+			"\\.ts$": "ts-jest"
+		},
+		"coverageThreshold": {
+			"global": {
+				"branches": 100,
+				"functions": 100,
+				"lines": 100,
+				"statements": 100
+			}
+		},
+		"testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
 	},
-	"author": "Evan Fleming",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/eflem00/koa-boilerplate/issues"
+	"prettier": {
+		"printWidth": 120,
+		"tabWidth": 2,
+		"useTabs": true,
+		"semi": true,
+		"singleQuote": true,
+		"trailingComma": "all"
 	},
-	"homepage": "https://github.com/eflem00/koa-boilerplate#readme",
+	"eslintConfig": {
+		"root": true,
+		"parser": "@typescript-eslint/parser",
+		"plugins": [
+			"@typescript-eslint"
+		],
+		"extends": [
+			"eslint:recommended",
+			"plugin:@typescript-eslint/eslint-recommended",
+			"plugin:@typescript-eslint/recommended"
+		],
+		"rules": {
+			"@typescript-eslint/explicit-function-return-type": 0,
+			"@typescript-eslint/no-explicit-any": 0,
+			"@typescript-eslint/typedef": [
+				"error",
+				{
+					"arrayDestructuring": true,
+					"objectDestructuring": true,
+					"variableDeclaration": true
+				}
+			]
+		}
+	},
+	"eslintIgnore": [
+		"node_modules",
+		"build",
+		"coverage"
+	],
 	"dependencies": {
 		"awilix": "^4.2.5",
 		"awilix-koa": "^4.0.0",

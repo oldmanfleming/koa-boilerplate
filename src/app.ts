@@ -3,7 +3,6 @@ import { createContainer, AwilixContainer, asValue } from 'awilix';
 import { scopePerRequest, loadControllers, inject } from 'awilix-koa';
 import { createLogger, Logger, format, transports } from 'winston';
 import bodyParser from 'koa-bodyparser';
-import dotenv from 'dotenv';
 import { createConnection, getCustomRepository, Connection, getConnectionOptions, ConnectionOptions } from 'typeorm';
 
 import RequestMiddleware from './middleware/RequestMiddleware';
@@ -22,10 +21,6 @@ export async function connectWithRetry(logger: Logger, connectionOptions: Connec
 export async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
-	if (process.env.NODE_ENV !== 'production') {
-		dotenv.config();
-	}
-
 	const logger: Logger = createLogger({
 		transports: [
 			new transports.Console({
@@ -35,7 +30,7 @@ export async function createApp(): Promise<Koa> {
 	});
 
 	const connectionOptions: ConnectionOptions = await getConnectionOptions(); // typeorm reads env vars to populate connection options
-	Object.assign(connectionOptions, { entities: [__dirname + '/models/*.{ts,js}'] }); //manually add entities directory name, as it will be different when running in ts-node dev vs compiled
+	Object.assign(connectionOptions, { type: 'postgres', entities: [__dirname + '/models/*.{ts,js}'] }); // manually add entities directory, as it will be different when running in ts-node dev vs compiled
 	const connection: Connection = await connectWithRetry(logger, connectionOptions);
 
 	logger.info('successfully established db connection');
