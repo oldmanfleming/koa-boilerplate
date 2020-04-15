@@ -3,6 +3,10 @@ language: node_js
 node_js:
   - 'lts/*'
 
+env:
+  - NODE_ENV=test
+  - PORT=3000
+
 script:
   - npm run commit
 
