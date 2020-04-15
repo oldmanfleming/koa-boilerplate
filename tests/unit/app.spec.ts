@@ -1,4 +1,4 @@
-import { createApp, connectWithRetry } from '../src/app';
+import { createApp, connectWithRetry } from '../../src/app';
 import * as typeorm from 'typeorm';
 import sinon from 'sinon';
 

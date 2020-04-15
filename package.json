@@ -16,17 +16,20 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rimraf ./build",
-		"commit": "run-s clean build lint test standup teardown",
+		"commit": "npm-run-all clean build lint unittest docker:up inttest docker:down",
 		"coveralls": "cat ./coverage/lcov.info | coveralls",
+		"inttest": "jest --testPathPattern=tests/integration/.*.spec.ts",
+		"inttest:watch": "jest --watchAll --testPathPattern=tests/integration/.*.spec.ts",
 		"lint": "eslint . --ext .ts",
+		"migration:generate": "typeorm migration:generate",
 		"migration:create": "typeorm migration:create",
 		"migration:run": "typeorm migration:run",
 		"migration:revert": "typeorm migration:revert",
-		"standup": "docker-compose up --force-recreate --build -d",
+		"docker:up": "docker-compose up --force-recreate --build -d",
+		"docker:down": "docker-compose logs && docker-compose down",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
-		"teardown": "docker-compose logs && docker-compose down",
-		"test": "jest --collectCoverage",
-		"test:watch": "jest --watchAll"
+		"unittest": "jest --collectCoverage --testPathPattern=tests/unit/.*.spec.ts",
+		"unittest:watch": "jest --watchAll --testPathPattern=tests/unit/.*.spec.ts"
 	},
 	"jest": {
 		"moduleFileExtensions": [
@@ -47,8 +50,7 @@
 				"lines": 100,
 				"statements": 100
 			}
-		},
-		"testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.ts$"
+		}
 	},
 	"prettier": {
 		"printWidth": 120,
@@ -79,7 +81,8 @@
 					"objectDestructuring": true,
 					"variableDeclaration": true
 				}
-			]
+			],
+			"@typescript-eslint/no-inferrable-types": 0
 		}
 	},
 	"eslintIgnore": [

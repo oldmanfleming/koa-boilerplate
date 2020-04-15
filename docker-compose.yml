@@ -6,12 +6,22 @@ services:
       - '8001:5432'
     environment:
       POSTGRES_PASSWORD: Password1
-  web:
+
+  migrations:
+    build: .
+    command: ['./wait-for-it.sh', 'database:5432', '--', 'npm', 'run', 'migration:run']
     depends_on:
-      - 'database'
+      - database
+    environment:
+      TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
+      TYPEORM_MIGRATIONS_TABLE_NAME: migrations
+      TYPEORM_MIGRATIONS: migrations/*.js
+
+  server:
     build: .
     ports:
       - '8000:3000'
     environment:
-      TYPEORM_CONNECTION: postgres
       TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
+    depends_on:
+      - migrations

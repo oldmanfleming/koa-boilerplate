@@ -1,4 +1,4 @@
-import HealthCheckController from '../../src//controllers/HealthCheckController';
+import HealthCheckController from '../../../src/controllers/HealthCheckController';
 import { OK } from 'http-status-codes';
 
 const mockConnection: any = { query: jest.fn() };

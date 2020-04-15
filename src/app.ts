@@ -12,7 +12,7 @@ export async function connectWithRetry(logger: Logger, connectionOptions: Connec
 	try {
 		return await createConnection(connectionOptions);
 	} catch (err) {
-		logger.error('failed to connect to db on startup - retrying in 5 seconds', err);
+		logger.error('failed to connect to db on startup - retrying in 5 seconds ', err);
 		await new Promise((resolve: any) => setTimeout(resolve, 5000));
 		return connectWithRetry(logger, connectionOptions);
 	}

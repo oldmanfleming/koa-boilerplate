@@ -1,4 +1,4 @@
-import RequestMiddleware from '../../src//middleware/RequestMiddleware';
+import RequestMiddleware from '../../../src/middleware/RequestMiddleware';
 import { OK, BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
 
 describe('Request Middleware', () => {

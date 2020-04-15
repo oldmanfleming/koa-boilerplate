@@ -4,6 +4,9 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY build ./
+COPY scripts/wait-for-it.sh ./
+
+RUN chmod +x ./wait-for-it.sh
 
 RUN npm ci --only=production
 
