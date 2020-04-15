@@ -1,9 +1,11 @@
 import request from 'supertest';
 import { OK } from 'http-status-codes';
-import { BasePath } from '../Constants';
+import Helper from '../Helper';
 
 describe('HealthCheck Controller', () => {
+	const helper: Helper = new Helper();
+
 	test.each([['/'], ['/health']])('returns 200 on both health paths', async (route: string) => {
-		await request(BasePath).get(route).expect(OK);
+		await request(helper.basePath).get(route).expect(OK);
 	});
 });

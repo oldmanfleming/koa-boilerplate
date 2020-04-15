@@ -3,7 +3,7 @@ services:
   database:
     image: postgres
     ports:
-      - '8001:5432'
+      - '8000:5432'
     environment:
       POSTGRES_PASSWORD: Password1
 
@@ -20,7 +20,7 @@ services:
   server:
     build: .
     ports:
-      - '8000:3000'
+      - '${PORT}:3000'
     environment:
       TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
     depends_on:
