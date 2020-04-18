@@ -28,7 +28,7 @@
 		"docker:up": "docker-compose up --force-recreate --build -d",
 		"docker:down": "docker-compose logs && docker-compose down",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
-		"unittest": "jest --collectCoverage --testPathPattern=tests/unit/.*.spec.ts",
+		"unittest": "jest --testPathPattern=tests/unit/.*.spec.ts",
 		"unittest:watch": "jest --watchAll --testPathPattern=tests/unit/.*.spec.ts"
 	},
 	"jest": {
@@ -37,8 +37,7 @@
 			"ts"
 		],
 		"collectCoverageFrom": [
-			"./src/**/*.ts",
-			"!./src/server.ts"
+			"./src/**/*.ts"
 		],
 		"transform": {
 			"\\.ts$": "ts-jest"
@@ -95,6 +94,8 @@
 		"awilix-koa": "^4.0.0",
 		"dotenv": "^8.2.0",
 		"http-status-codes": "^1.4.0",
+		"jsonwebtoken": "^8.5.1",
+		"kcors": "^2.2.2",
 		"koa": "^2.11.0",
 		"koa-bodyparser": "^4.3.0",
 		"pg": "^8.0.0",
@@ -104,7 +105,9 @@
 	},
 	"devDependencies": {
 		"@types/jest": "^25.2.1",
+		"@types/kcors": "^2.2.3",
 		"@types/koa": "^2.11.3",
+		"@types/koa-bodyparser": "^4.3.0",
 		"@types/node": "^13.11.0",
 		"@types/pg": "^7.14.3",
 		"@types/sinon": "^9.0.0",

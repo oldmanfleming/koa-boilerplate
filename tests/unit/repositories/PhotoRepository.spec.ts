@@ -1,4 +1,4 @@
-import { PhotoRepository } from '../../../src/repositories/PhotoRepository';
+import PhotoRepository from '../../../src/repositories/PhotoRepository';
 import sinon from 'sinon';
 
 describe('Photo Repository', () => {

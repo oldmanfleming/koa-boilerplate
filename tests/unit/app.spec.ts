@@ -1,30 +1,26 @@
 import { createApp, connectWithRetry } from '../../src/app';
+import Config from '../../src/lib/Config';
+import logger from '../../src/lib/Logger';
 import * as typeorm from 'typeorm';
-import sinon from 'sinon';
+import sinon, { SinonSandbox, SinonStub } from 'sinon';
 
 describe('App', () => {
-	const sandbox: any = sinon.createSandbox();
-	let mockConnection: any;
+	const sandbox: SinonSandbox = sinon.createSandbox();
+	const mockConnection: SinonStub = sandbox.stub(typeorm, 'createConnection');
+	sandbox.stub(Config);
+	sandbox.stub(logger, 'info');
+	sandbox.stub(logger, 'error');
 
 	beforeEach(() => {
-		mockConnection = sandbox.stub(typeorm, 'createConnection');
-		sandbox.stub(typeorm, 'getConnectionOptions').returns({});
-		sandbox.stub(typeorm, 'getCustomRepository');
-		process.env.NODE_ENV = 'dev';
+		sandbox.reset();
+		process.env.SECRET = 'test';
 	});
 
 	afterEach(() => {
-		sandbox.restore();
-		delete process.env.NODE_ENV;
+		delete process.env.SECRET;
 	});
 
-	test('Does not throw in base case', async () => {
-		await createApp();
-		expect(mockConnection.callCount).toBe(1);
-	});
-
-	test('Doesnt load env variables in prod', async () => {
-		process.env.NODE_ENV = 'production';
+	test('Does not throw when creating app', async () => {
 		await createApp();
 		expect(mockConnection.callCount).toBe(1);
 	});
@@ -32,14 +28,9 @@ describe('App', () => {
 	test('Connect with rety catches exceptions and retries', async () => {
 		const clock: any = sinon.useFakeTimers();
 		mockConnection.onCall(0).throws('Could not connect');
-		mockConnection.onCall(1).returns();
-		const mockLogger: any = { error: sandbox.spy() };
-		const fakeConnectionOptions: any = { something: 'fake' };
-		connectWithRetry(mockLogger, fakeConnectionOptions);
+		mockConnection.onCall(1).returns({});
+		connectWithRetry();
 		await clock.tickAsync(5000);
 		expect(mockConnection.callCount).toBe(2);
-		expect(mockConnection.args[0][0]).toEqual(fakeConnectionOptions);
-		expect(mockConnection.args[1][0]).toEqual(fakeConnectionOptions);
-		expect(mockLogger.error.callCount).toBe(1);
 	});
 });

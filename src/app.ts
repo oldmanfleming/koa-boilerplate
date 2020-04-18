@@ -1,52 +1,42 @@
 import Koa from 'koa';
 import { createContainer, AwilixContainer, asValue } from 'awilix';
-import { scopePerRequest, loadControllers, inject } from 'awilix-koa';
-import { createLogger, Logger, format, transports } from 'winston';
+import { scopePerRequest, loadControllers } from 'awilix-koa';
+import { createConnection, Connection } from 'typeorm';
 import bodyParser from 'koa-bodyparser';
-import { createConnection, getCustomRepository, Connection, getConnectionOptions, ConnectionOptions } from 'typeorm';
+import kcors from 'kcors';
 
-import RequestMiddleware from './middleware/RequestMiddleware';
-import { PhotoRepository } from './repositories/PhotoRepository';
+import errorMiddleware from './middleware/ErrorMiddleware';
+import Logger from './lib/Logger';
+import Config from './lib/Config';
 
-export async function connectWithRetry(logger: Logger, connectionOptions: ConnectionOptions): Promise<Connection> {
+export async function connectWithRetry(): Promise<Connection> {
 	try {
-		return await createConnection(connectionOptions);
+		return await createConnection();
 	} catch (err) {
-		logger.error('failed to connect to db on startup - retrying in 5 seconds ', err);
+		Logger.error('failed to connect to db on startup - retrying in 5 seconds ', err);
 		await new Promise((resolve: any) => setTimeout(resolve, 5000));
-		return connectWithRetry(logger, connectionOptions);
+		return connectWithRetry();
 	}
 }
 
 export async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
-	const logger: Logger = createLogger({
-		transports: [
-			new transports.Console({
-				format: format.simple(),
-			}),
-		],
-	});
+	const config: Config = new Config();
+	const connection: Connection = await connectWithRetry();
 
-	const connectionOptions: ConnectionOptions = await getConnectionOptions(); // typeorm reads env vars to populate connection options
-	Object.assign(connectionOptions, { type: 'postgres', entities: [__dirname + '/models/*.{ts,js}'] }); // manually add entities directory, as it will be different when running in ts-node dev vs compiled
-	const connection: Connection = await connectWithRetry(logger, connectionOptions);
-
-	logger.info('successfully established db connection');
-
-	const photoRepository: PhotoRepository = getCustomRepository(PhotoRepository);
+	Logger.info('successfully established db connection');
 
 	const container: AwilixContainer = createContainer().register({
-		logger: asValue(logger),
+		config: asValue(config),
 		connection: asValue(connection),
-		photoRepository: asValue(photoRepository),
 	});
 
 	app
+		.use(kcors())
 		.use(bodyParser())
 		.use(scopePerRequest(container))
-		.use(inject(RequestMiddleware))
+		.use(errorMiddleware)
 		.use(loadControllers('controllers/*.{ts,js}', { cwd: __dirname }));
 
 	return app;

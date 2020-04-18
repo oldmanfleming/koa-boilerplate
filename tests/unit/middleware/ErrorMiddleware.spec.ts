@@ -1,29 +1,26 @@
-import RequestMiddleware from '../../../src/middleware/RequestMiddleware';
+import middleware from '../../../src/middleware/ErrorMiddleware';
 import { OK, BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
+import logger from '../../../src/lib/Logger';
+import sinon, { SinonSandbox } from 'sinon';
 
-describe('Request Middleware', () => {
-	const mockLogger: any = { info: jest.fn(), error: jest.fn() };
+describe('Error Middleware', () => {
+	const sandbox: SinonSandbox = sinon.createSandbox();
 	const mockContext: any = {
 		status: OK,
 		request: { path: '/' },
 	};
-	const mockNext: any = jest.fn();
-	const middleware: Function = RequestMiddleware({ logger: mockLogger });
+	const mockNext: any = sandbox.stub();
+	sandbox.stub(logger, 'info');
+	sandbox.stub(logger, 'error');
 
 	beforeEach(() => {
-		mockLogger.info.mockReset();
-		mockLogger.error.mockReset();
-		mockNext.mockReset();
+		sandbox.reset();
 	});
 
 	test('Errors caught and status and body are obfuscated with 404 when ex status undefined', async () => {
-		mockNext.mockImplementation(() => {
-			throw new Error('fatal');
-		});
+		mockNext.rejects();
 		await middleware(mockContext, mockNext);
-		expect(mockNext.mock.calls.length).toBe(1);
-		expect(mockLogger.error.mock.calls.length).toBe(1);
-		expect(mockLogger.error.mock.calls[0][1]).toEqual(new Error('fatal'));
+		expect(mockNext.callCount).toBe(1);
 		expect(mockContext.status).toBe(BAD_REQUEST);
 		expect(mockContext.body).toEqual({ message: 'Invalid request' });
 	});
@@ -31,13 +28,9 @@ describe('Request Middleware', () => {
 	test('Errors caught and status and body are obfuscated with 404 when ex status 500', async () => {
 		const error: any = new Error('fatal');
 		error.status = 500;
-		mockNext.mockImplementation(() => {
-			throw error;
-		});
+		mockNext.rejects(error);
 		await middleware(mockContext, mockNext);
-		expect(mockNext.mock.calls.length).toBe(1);
-		expect(mockLogger.error.mock.calls.length).toBe(1);
-		expect(mockLogger.error.mock.calls[0][1]).toEqual(error);
+		expect(mockNext.callCount).toBe(1);
 		expect(mockContext.status).toBe(BAD_REQUEST);
 		expect(mockContext.body).toEqual({ message: 'Invalid request' });
 	});
@@ -45,12 +38,9 @@ describe('Request Middleware', () => {
 	test('Exceptions exposed when not 500', async () => {
 		const error: any = new Error('Unauthorized');
 		error.status = 401;
-		mockNext.mockImplementation(() => {
-			throw error;
-		});
+		mockNext.rejects(error);
 		await middleware(mockContext, mockNext);
-		expect(mockNext.mock.calls.length).toBe(1);
-		expect(mockLogger.error.mock.calls.length).toBe(0);
+		expect(mockNext.callCount).toBe(1);
 		expect(mockContext.status).toBe(UNAUTHORIZED);
 		expect(mockContext.body).toEqual({ message: 'Unauthorized' });
 	});
