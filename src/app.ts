@@ -7,7 +7,7 @@ import kcors from 'kcors';
 
 import errorMiddleware from './middleware/ErrorMiddleware';
 import Logger from './lib/Logger';
-import Config from './lib/Config';
+import Security from './lib/Security';
 
 export async function connectWithRetry(): Promise<Connection> {
 	try {
@@ -22,13 +22,13 @@ export async function connectWithRetry(): Promise<Connection> {
 export async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
-	const config: Config = new Config();
+	const security: Security = new Security();
 	const connection: Connection = await connectWithRetry();
 
 	Logger.info('successfully established db connection');
 
 	const container: AwilixContainer = createContainer().register({
-		config: asValue(config),
+		security: asValue(security),
 		connection: asValue(connection),
 	});
 
