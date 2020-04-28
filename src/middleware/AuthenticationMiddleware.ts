@@ -27,7 +27,7 @@ export default function ({ connection, security }: { connection: Connection; sec
 				ctx.throw(401, 'Unauthorized');
 			}
 			ctx.state.user = user;
-			ctx.state.user.token = token;
+			ctx.state.token = token;
 			return next();
 		} catch {
 			ctx.throw(401, 'Unauthorized');

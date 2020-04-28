@@ -9,10 +9,10 @@ export interface Claims {
 }
 
 export default class Security {
-	private _iterations: number = 2048;
-	private _keyLen: number = 32;
-	private _saltLen: number = 16;
-	private _digest: string = 'sha512';
+	private static _iterations: number = 2048;
+	private static _keyLen: number = 32;
+	private static _saltLen: number = 16;
+	private static _digest: string = 'sha512';
 	private _tokenExp: string = '1d';
 	private _secret: string;
 
@@ -22,21 +22,21 @@ export default class Security {
 		delete process.env.SECRET;
 	}
 
-	public hashPassword(user: User): void {
+	public static hashPassword(user: User): void {
 		const salt: string = randomBytes(this._saltLen).toString('hex');
 		const hash: string = pbkdf2Sync(user.password, salt, this._iterations, this._keyLen, this._digest).toString('hex');
 		user.password = [salt, hash].join('$');
 	}
 
-	public verifyHash(password: string, key: string): boolean {
+	public static verifyHash(password: string, key: string): boolean {
 		const originalHash: string = key.split('$')[1];
 		const salt: string = key.split('$')[0];
 		const hash: string = pbkdf2Sync(password, salt, this._iterations, this._keyLen, this._digest).toString('hex');
 		return hash === originalHash;
 	}
 
-	public addToken(user: User): void {
-		const token: string = jwt.sign(
+	public generateToken(user: User): string {
+		return jwt.sign(
 			{
 				id: user.id,
 				username: user.username,
@@ -45,7 +45,6 @@ export default class Security {
 			this._secret,
 			{ expiresIn: this._tokenExp },
 		);
-		user.token = token;
 	}
 
 	public verifyToken(token: string): Claims {

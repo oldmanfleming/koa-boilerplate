@@ -38,13 +38,13 @@ export default class UserController {
 
 		const user: User = new User();
 		Object.assign(user, ctx.request.body.user);
-		this._security.hashPassword(user);
+		Security.hashPassword(user);
 
 		await this._userRepository.save(user);
 
-		this._security.addToken(user);
+		const token: string = this._security.generateToken(user);
 
-		ctx.body = user.toJSON();
+		ctx.body = user.toJSON(token);
 		ctx.status = CREATED;
 	}
 
@@ -68,13 +68,13 @@ export default class UserController {
 			ctx.throw(401, 'Unauthorized');
 		}
 
-		if (!this._security.verifyHash(password, user.password)) {
+		if (!Security.verifyHash(password, user.password)) {
 			ctx.throw(401, 'Unauthorized');
 		}
 
-		this._security.addToken(user);
+		const token: string = this._security.generateToken(user);
 
-		ctx.body = user.toJSON();
+		ctx.body = user.toJSON(token);
 		ctx.status = OK;
 	}
 
@@ -82,7 +82,7 @@ export default class UserController {
 	@GET()
 	@before([inject(AuthenticationMiddleware)])
 	async getCurrentUser(ctx: Context) {
-		ctx.body = ctx.state.user.toJSON();
+		ctx.body = ctx.state.user.toJSON(ctx.state.token);
 		ctx.status = OK;
 	}
 
@@ -100,11 +100,8 @@ export default class UserController {
 		});
 		const user: User = ctx.state.user;
 		Object.assign(user, ctx.request.body.user);
-		const token: string = user.token;
-		delete user.token; // TODO Remove
 		await this._userRepository.update(user.id, user);
-		user.token = token;
-		ctx.body = user.toJSON();
+		ctx.body = user.toJSON(ctx.state.token);
 		ctx.status = OK;
 	}
 }

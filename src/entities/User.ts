@@ -20,8 +20,6 @@ export class User {
 	@Column()
 	password!: string;
 
-	token!: string; // TODO REMOVE
-
 	// @ManyToMany(type => ArticleEntity)
 	// @JoinTable()
 	// favorites: ArticleEntity[];
@@ -29,14 +27,14 @@ export class User {
 	// @OneToMany(type => ArticleEntity, article => article.author)
 	// articles: ArticleEntity[];
 
-	toJSON() {
+	toJSON(token: string) {
 		return {
 			user: {
 				email: this.email,
 				username: this.username,
 				bio: this.bio,
 				image: this.image,
-				token: this.token,
+				token,
 			},
 		};
 	}
