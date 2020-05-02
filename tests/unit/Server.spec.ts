@@ -1,5 +1,5 @@
 import Logger from '../../src/Logger';
-import * as app from '../../src/app';
+import * as app from '../../src/App';
 import dotenv from 'dotenv';
 import sinon, { SinonSandbox, SinonStub } from 'sinon';
 
@@ -13,7 +13,7 @@ describe('App', () => {
 
 	// The server will immediately bootstrap itself. We have to wait until we have sufficiently mocked things before we can import the server
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const server: any = require('../../src/server');
+	const server: any = require('../../src/Server');
 
 	beforeEach(() => {
 		sandbox.reset();

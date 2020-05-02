@@ -1,4 +1,4 @@
-import { createApp, connectWithRetry } from '../../src/app';
+import { createApp, connectWithRetry } from '../../src/App';
 import SecurityService from '../../src/services/SecurityService';
 import logger from '../../src/Logger';
 import * as typeorm from 'typeorm';

@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import dotenv from 'dotenv';
 
-import { createApp } from './app';
+import { createApp } from './App';
 import Logger from './Logger';
 
 import 'reflect-metadata';
@@ -14,9 +14,8 @@ export async function startServer() {
 		}
 		Logger.info(`environment set to ${process.env.NODE_ENV}`);
 		const app: Koa = await createApp();
-		const port: string = process.env.PORT || '3000';
-		app.listen(port);
-		Logger.info(`listening on localhost:${port}`);
+		app.listen(process.env.PORT);
+		Logger.info(`listening on localhost:${process.env.PORT}`);
 	} catch (ex) {
 		Logger.error('exception starting server: ', ex);
 	}
