@@ -13,6 +13,7 @@ services:
     depends_on:
       - database
     environment:
+      TYPEORM_CONNECTION: postgres
       TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
       TYPEORM_MIGRATIONS_TABLE_NAME: migrations
       TYPEORM_MIGRATIONS: migrations/*.js
@@ -22,6 +23,9 @@ services:
     ports:
       - '${PORT}:3000'
     environment:
+      TYPEORM_CONNECTION: postgres
       TYPEORM_URL: postgres://postgres:Password1@database:5432/postgres
+      TYPEORM_ENTITIES: src/entities/*.js
+      SECRET: foobar
     depends_on:
       - migrations
