@@ -1,36 +1,45 @@
 import { Context, Next } from 'koa';
 import { Connection } from 'typeorm';
+import { UNAUTHORIZED } from 'http-status-codes';
 
-import Security, { Claims } from '../lib/Security';
+import SecurityService, { Claims } from '../services/SecurityService';
 import UserRepository from '../repositories/UserRepository';
 import { User } from '../entities/User';
 
-export default function ({ connection, security }: { connection: Connection; security: Security }) {
+export default function ({
+	connection,
+	securityService,
+}: {
+	connection: Connection;
+	securityService: SecurityService;
+}) {
 	return async function (ctx: Context, next: Next) {
 		const { authorization }: { authorization: string } = ctx.header;
 
 		if (!authorization) {
-			ctx.throw(401, 'Unauthorized');
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
 		}
 
 		const [tokenType, token]: string[] = authorization.split(' ');
 
 		if (tokenType.toLowerCase() !== 'bearer' && tokenType.toLowerCase() !== 'token') {
-			ctx.throw(401, 'Unauthorized');
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
 		}
 
+		let claims: Claims;
 		try {
-			const claims: Claims = security.verifyToken(token);
-			const userRepository: UserRepository = connection.getCustomRepository(UserRepository);
-			const user: User | undefined = await userRepository.findOne(claims.id);
-			if (!user) {
-				ctx.throw(401, 'Unauthorized');
-			}
-			ctx.state.user = user;
-			ctx.state.token = token;
-			return next();
+			claims = securityService.verifyToken(token);
 		} catch {
-			ctx.throw(401, 'Unauthorized');
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
 		}
+
+		const userRepository: UserRepository = connection.getCustomRepository(UserRepository);
+		const user: User | undefined = await userRepository.findOne(claims.id);
+		if (!user) {
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
+		}
+		ctx.state.user = user;
+		ctx.state.token = token;
+		return next();
 	};
 }

@@ -25,7 +25,7 @@
 		"docker:up": "docker-compose up --force-recreate --build -d",
 		"docker:down": "docker-compose logs && docker-compose down",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/server.ts",
-		"unittest": "jest --testPathPattern=tests/unit/.*.spec.ts",
+		"unittest": "jest  --collectCoverage --testPathPattern=tests/unit/.*.spec.ts",
 		"unittest:watch": "jest --watchAll --testPathPattern=tests/unit/.*.spec.ts"
 	},
 	"jest": {
@@ -34,7 +34,8 @@
 			"ts"
 		],
 		"collectCoverageFrom": [
-			"./src/**/*.ts"
+			"./src/**/*.ts",
+			"!./src/entities/*.ts"
 		],
 		"transform": {
 			"\\.ts$": "ts-jest"

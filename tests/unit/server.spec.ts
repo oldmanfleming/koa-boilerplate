@@ -1,4 +1,4 @@
-import Logger from '../../src/lib/Logger';
+import Logger from '../../src/Logger';
 import * as app from '../../src/app';
 import dotenv from 'dotenv';
 import sinon, { SinonSandbox, SinonStub } from 'sinon';

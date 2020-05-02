@@ -1,6 +1,6 @@
 import middleware from '../../../src/middleware/ErrorMiddleware';
 import { OK, BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
-import logger from '../../../src/lib/Logger';
+import logger from '../../../src/Logger';
 import sinon, { SinonSandbox } from 'sinon';
 
 describe('Error Middleware', () => {

@@ -6,8 +6,8 @@ import bodyParser from 'koa-bodyparser';
 import kcors from 'kcors';
 
 import errorMiddleware from './middleware/ErrorMiddleware';
-import Logger from './lib/Logger';
-import Security from './lib/Security';
+import Logger from './Logger';
+import SecurityService from './services/SecurityService';
 
 export async function connectWithRetry(): Promise<Connection> {
 	try {
@@ -22,13 +22,13 @@ export async function connectWithRetry(): Promise<Connection> {
 export async function createApp(): Promise<Koa> {
 	const app: Koa = new Koa();
 
-	const security: Security = new Security();
+	const securityService: SecurityService = new SecurityService();
 	const connection: Connection = await connectWithRetry();
 
 	Logger.info('successfully established db connection');
 
 	const container: AwilixContainer = createContainer().register({
-		security: asValue(security),
+		securityService: asValue(securityService),
 		connection: asValue(connection),
 	});
 

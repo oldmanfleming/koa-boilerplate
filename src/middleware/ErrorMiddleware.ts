@@ -1,6 +1,6 @@
 import { Context, Next } from 'koa';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
-import logger from '../lib/Logger';
+import logger from '../Logger';
 
 export default async function (ctx: Context, next: Next) {
 	const startTime: number = Date.now();

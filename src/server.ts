@@ -2,7 +2,7 @@ import Koa from 'koa';
 import dotenv from 'dotenv';
 
 import { createApp } from './app';
-import Logger from './lib/Logger';
+import Logger from './Logger';
 
 import 'reflect-metadata';
 

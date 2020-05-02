@@ -1,24 +1,41 @@
-// import Security from '../../../src/lib/Security';
+import SecurityService, { Claims } from '../../../src/services/SecurityService';
+import { User } from '../../../src/entities/User';
 
-// describe('App', () => {
-// 	afterEach(() => {
-// 		delete process.env.SECRET;
-// 	});
+describe('App', () => {
+	process.env.SECRET = 'test-secret';
+	const securityService: SecurityService = new SecurityService();
+	delete process.env.SECRET;
 
-// 	test('Reads secret frm env', async () => {
-// 		const testSecret: string = 'test-secret';
-// 		process.env.SECRET = testSecret;
-// 		const config: Config = new Config();
-// 		expect(config.secret).toBe(testSecret);
-// 	});
+	test('missing secret causes SecurityService instantiation to throw', async () => {
+		let threw: boolean = false;
+		try {
+			new SecurityService();
+		} catch {
+			threw = true;
+		}
+		expect(threw).toBe(true);
+	});
 
-// 	test('throws when no secret defined', async () => {
-// 		expect(() => new Config()).toThrow();
-// 	});
-// });
+	test('jwt workflow adds user to claims and creates valid jwt', async () => {
+		const user: User = new User();
+		user.id = 123;
+		user.username = 'test-username';
+		user.email = 'test@gmail.com';
+		const token: string = securityService.generateToken(user);
+		const claims: Claims = securityService.verifyToken(token);
+		expect(claims.id).toEqual(user.id);
+		expect(claims.username).toEqual(user.username);
+		expect(claims.email).toEqual(user.email);
+		expect(claims.iat).toBeGreaterThan(0);
+		expect(claims.exp).toBeGreaterThan(0);
+	});
 
-describe('', () => {
-	test('', () => {
-		expect(1).toBe(1);
+	test('password hashing workflow hashes user password', async () => {
+		const password: string = 'password';
+		const user: User = new User();
+		user.password = password;
+		SecurityService.hashPassword(user);
+		expect(user.password).not.toEqual(password);
+		expect(SecurityService.verifyHash(password, user.password)).toBe(true);
 	});
 });

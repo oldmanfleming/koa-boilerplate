@@ -1,26 +1,28 @@
-// import PhotoRepository from '../../../src/repositories/PhotoRepository';
-// import sinon from 'sinon';
+import UserRepository from '../../../src/repositories/UserRepository';
+import sinon from 'sinon';
+import { User } from '../../../src/entities/User';
 
-// describe('Photo Repository', () => {
-// 	const sandbox: any = sinon.createSandbox();
-// 	const repository: PhotoRepository = new PhotoRepository();
-// 	const mockCreateQueryBuilder: any = sandbox.stub(repository, 'createQueryBuilder');
-// 	const mockWhere: any = sandbox.stub();
-// 	const mockGetMany: any = sandbox.spy();
-// 	mockCreateQueryBuilder.returns({ where: mockWhere });
-// 	mockWhere.returns({ getMany: mockGetMany });
+describe('User Repository', () => {
+	const sandbox: any = sinon.createSandbox();
+	const repository: UserRepository = new UserRepository();
+	const mockCreateQueryBuilder: any = sandbox.stub(repository, 'createQueryBuilder');
 
-// 	afterEach(() => {
-// 		sandbox.restore();
-// 	});
+	afterEach(() => {
+		sandbox.restore();
+	});
 
-// 	test('something', async () => {
-// 		await repository.findByName('');
-// 	});
-// });
+	test('findByEmail returns results of query using email', async () => {
+		const user: User = new User();
+		const email: string = 'some-email@gmail.com';
+		const mockWhere: any = sandbox.stub();
+		const mockGetOne: any = sandbox.stub();
+		mockCreateQueryBuilder.returns({ where: mockWhere });
+		mockWhere.returns({ getOne: mockGetOne });
+		mockGetOne.returns(user);
 
-describe('', () => {
-	test('', () => {
-		expect(1).toBe(1);
+		const result: User | undefined = await repository.findByEmail(email);
+
+		expect(result).toEqual(user);
+		expect(mockWhere.getCall(0).args[1]).toEqual({ email });
 	});
 });

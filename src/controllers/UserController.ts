@@ -1,23 +1,23 @@
 import { route, GET, POST, before, inject, PUT } from 'awilix-koa';
-import { OK, CREATED } from 'http-status-codes';
+import { OK, CREATED, UNAUTHORIZED } from 'http-status-codes';
 import { Context } from 'koa';
 import { Connection } from 'typeorm';
 import { assert, object, string } from '@hapi/joi';
 
 import { User } from '../entities/User';
 import UserRepository from '../repositories/UserRepository';
-import Security from '../lib/Security';
+import SecurityService from '../services/SecurityService';
 import AuthenticationMiddleware from '../middleware/AuthenticationMiddleware';
 
 @route('/api')
 export default class UserController {
 	private _userRepository: UserRepository;
-	private _security: Security;
+	private _securityService: SecurityService;
 
 	// Any Dependencies registered to the container can be injected here
-	constructor({ connection, security }: { connection: Connection; security: Security }) {
+	constructor({ connection, securityService }: { connection: Connection; securityService: SecurityService }) {
 		this._userRepository = connection.getCustomRepository(UserRepository);
-		this._security = security;
+		this._securityService = securityService;
 	}
 
 	@route('/users')
@@ -27,9 +27,9 @@ export default class UserController {
 			ctx.request.body,
 			object({
 				user: object({
-					username: string().alphanum().min(5).max(30).required(),
+					username: string().alphanum().min(5).max(12).required(),
 					email: string().email().required(),
-					password: string().min(5).max(100).required(),
+					password: string().min(5).max(30).required(),
 					bio: string().max(1000),
 					image: string().max(1000),
 				}),
@@ -38,11 +38,11 @@ export default class UserController {
 
 		const user: User = new User();
 		Object.assign(user, ctx.request.body.user);
-		Security.hashPassword(user);
+		SecurityService.hashPassword(user);
 
 		await this._userRepository.save(user);
 
-		const token: string = this._security.generateToken(user);
+		const token: string = this._securityService.generateToken(user);
 
 		ctx.body = user.toJSON(token);
 		ctx.status = CREATED;
@@ -65,14 +65,14 @@ export default class UserController {
 		const user: User | undefined = await this._userRepository.findByEmail(email);
 
 		if (!user) {
-			ctx.throw(401, 'Unauthorized');
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
 		}
 
-		if (!Security.verifyHash(password, user.password)) {
-			ctx.throw(401, 'Unauthorized');
+		if (!SecurityService.verifyHash(password, user.password)) {
+			ctx.throw(UNAUTHORIZED, 'Unauthorized');
 		}
 
-		const token: string = this._security.generateToken(user);
+		const token: string = this._securityService.generateToken(user);
 
 		ctx.body = user.toJSON(token);
 		ctx.status = OK;

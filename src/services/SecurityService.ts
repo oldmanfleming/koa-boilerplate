@@ -6,6 +6,8 @@ export interface Claims {
 	id: number;
 	username: string;
 	email: string;
+	iat: number;
+	exp: number;
 }
 
 export default class Security {
