@@ -1,13 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Index, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Article } from './Article';
+import { Comment } from './Comment';
 
 @Entity('users')
 export class User {
 	@PrimaryGeneratedColumn()
 	id!: number;
 
+	@Index({ unique: true })
 	@Column()
 	username!: string;
 
+	@Index({ unique: true })
 	@Column()
 	email!: string;
 
@@ -20,12 +24,19 @@ export class User {
 	@Column()
 	password!: string;
 
-	// @ManyToMany(type => ArticleEntity)
-	// @JoinTable()
-	// favorites: ArticleEntity[];
+	@ManyToMany(() => User)
+	@JoinTable()
+	followers!: User[];
 
-	// @OneToMany(type => ArticleEntity, article => article.author)
-	// articles: ArticleEntity[];
+	@ManyToMany(() => Article)
+	@JoinTable()
+	favorites!: Article[];
+
+	@OneToMany(() => Article, (article: Article) => article.author)
+	articles!: Article[];
+
+	@OneToMany(() => Comment, (comment: Comment) => comment.author)
+	comments!: Comment[];
 
 	toJSON(token: string) {
 		return {
