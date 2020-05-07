@@ -27,7 +27,7 @@ export default class UserController {
 			ctx.request.body,
 			object({
 				user: object({
-					username: string().alphanum().min(5).max(12).required(),
+					username: string().min(5).max(30).required(),
 					email: string().email().required(),
 					password: string().min(5).max(30).required(),
 					bio: string().max(1000),
@@ -44,7 +44,7 @@ export default class UserController {
 
 		const token: string = this._securityService.generateToken(user);
 
-		ctx.body = user.toJSON(token);
+		ctx.body = user.toUserJSON(token);
 		ctx.status = CREATED;
 	}
 
@@ -62,7 +62,7 @@ export default class UserController {
 		);
 
 		const { email, password }: { email: string; password: string } = ctx.request.body.user;
-		const user: User | undefined = await this._userRepository.findByEmail(email);
+		const user: User | undefined = await this._userRepository.findOne({ email });
 
 		if (!user) {
 			ctx.throw(UNAUTHORIZED, 'Unauthorized');
@@ -74,7 +74,7 @@ export default class UserController {
 
 		const token: string = this._securityService.generateToken(user);
 
-		ctx.body = user.toJSON(token);
+		ctx.body = user.toUserJSON(token);
 		ctx.status = OK;
 	}
 
@@ -82,7 +82,7 @@ export default class UserController {
 	@GET()
 	@before([inject(AuthenticationMiddleware)])
 	async getCurrentUser(ctx: Context) {
-		ctx.body = ctx.state.user.toJSON(ctx.state.token);
+		ctx.body = ctx.state.user.toUserJSON(ctx.state.token);
 		ctx.status = OK;
 	}
 
@@ -92,7 +92,7 @@ export default class UserController {
 	async updateUser(ctx: Context) {
 		object({
 			user: object({
-				username: string().alphanum().min(5).max(30).required(),
+				username: string().min(5).max(30).required(),
 				email: string().email().required(),
 				bio: string().max(1000),
 				image: string().max(1000),
@@ -101,7 +101,7 @@ export default class UserController {
 		const user: User = ctx.state.user;
 		Object.assign(user, ctx.request.body.user);
 		await this._userRepository.update(user.id, user);
-		ctx.body = user.toJSON(ctx.state.token);
+		ctx.body = user.toUserJSON(ctx.state.token);
 		ctx.status = OK;
 	}
 }

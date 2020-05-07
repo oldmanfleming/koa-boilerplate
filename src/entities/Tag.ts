@@ -4,4 +4,8 @@ import { Entity, PrimaryColumn } from 'typeorm';
 export class Tag {
 	@PrimaryColumn()
 	label!: string;
+
+	toJSON() {
+		return this.label;
+	}
 }

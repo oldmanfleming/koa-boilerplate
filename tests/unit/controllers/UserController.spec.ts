@@ -13,7 +13,7 @@ describe('User Controller', () => {
 	const image: string = 'test-image';
 	const token: string = 'some-token';
 
-	const mockUserRepository: any = { save: sandbox.spy(), findByEmail: sandbox.stub(), update: sandbox.spy() };
+	const mockUserRepository: any = { save: sandbox.spy(), findOne: sandbox.stub(), update: sandbox.spy() };
 	const mockConnection: any = {
 		getCustomRepository: sandbox.stub().returns(mockUserRepository),
 	};
@@ -71,9 +71,8 @@ describe('User Controller', () => {
 	});
 
 	test.each([
-		[{ username: 'username^&*^test' }],
 		[{ username: '1234' }],
-		[{ username: '1234567891234' }],
+		[{ username: '1234567891234567891234567891234' }],
 		[{ email: 'bademail.com' }],
 		[{ password: '1234' }],
 		[{ password: '1234567891234567891234567891234' }],
@@ -110,18 +109,18 @@ describe('User Controller', () => {
 		const user: User = new User();
 		user.password = password;
 
-		mockUserRepository.findByEmail.resolves(user);
+		mockUserRepository.findOne.resolves(user);
 		mockVerifyHash.returns(true);
 		mockSecurityService.generateToken.returns(token);
 
 		await controller.login(mockContext);
 
-		expect(mockUserRepository.findByEmail.getCall(0).args[0]).toEqual(email);
+		expect(mockUserRepository.findOne.getCall(0).args[0]).toEqual({ email });
 		expect(mockVerifyHash.getCall(0).args[0]).toEqual(password);
 		expect(mockVerifyHash.getCall(0).args[1]).toEqual(password);
 		expect(mockSecurityService.generateToken.getCall(0).args[0]).toEqual(user);
 		expect(mockContext.status).toEqual(OK);
-		expect(mockContext.body).toEqual(user.toJSON(token));
+		expect(mockContext.body).toEqual(user.toUserJSON(token));
 	});
 
 	test('login throws when user is not found', async () => {
@@ -137,12 +136,12 @@ describe('User Controller', () => {
 			throw: sandbox.stub().throws(),
 		};
 
-		mockUserRepository.findByEmail.resolves(undefined);
+		mockUserRepository.findOne.resolves(undefined);
 		mockVerifyHash.returns(true);
 
 		expect(controller.login(mockContext)).rejects.toThrow();
 
-		expect(mockUserRepository.findByEmail.getCall(0).args[0]).toEqual(email);
+		expect(mockUserRepository.findOne.getCall(0).args[0]).toEqual({ email });
 		expect(mockVerifyHash.callCount).toEqual(0);
 		expect(mockSecurityService.generateToken.callCount).toEqual(0);
 	});
@@ -160,12 +159,12 @@ describe('User Controller', () => {
 			throw: sandbox.stub().throws(),
 		};
 
-		mockUserRepository.findByEmail.resolves({ password });
+		mockUserRepository.findOne.resolves({ password });
 		mockVerifyHash.returns(false);
 
 		expect(controller.login(mockContext)).rejects.toThrow();
 
-		expect(mockUserRepository.findByEmail.getCall(0).args[0]).toEqual(email);
+		expect(mockUserRepository.findOne.getCall(0).args[0]).toEqual({ email });
 		expect(mockVerifyHash.callCount).toEqual(0);
 		expect(mockSecurityService.generateToken.callCount).toEqual(0);
 	});
@@ -183,7 +182,7 @@ describe('User Controller', () => {
 		await controller.getCurrentUser(mockContext);
 
 		expect(mockContext.status).toEqual(OK);
-		expect(mockContext.body).toEqual(user.toJSON(token));
+		expect(mockContext.body).toEqual(user.toUserJSON(token));
 	});
 
 	test('Update User takes user from state, assigns new props and calls update in user repo', async () => {
