@@ -7,7 +7,7 @@ export default async function (ctx: Context, next: Next) {
 	try {
 		await next();
 	} catch (ex) {
-		if (ex.name === 'ValidationError') {
+		if (ex.isJoi) {
 			ctx.status = UNPROCESSABLE_ENTITY;
 			ctx.body = {
 				errors: {
@@ -18,7 +18,7 @@ export default async function (ctx: Context, next: Next) {
 			ctx.status = ex.status;
 			ctx.body = { message: ex.message };
 		} else {
-			logger.error('Caught Exception: ', ex);
+			logger.error('Unexpected Error: ', ex);
 			ctx.status = BAD_REQUEST;
 			ctx.body = { message: 'Invalid request' };
 		}
