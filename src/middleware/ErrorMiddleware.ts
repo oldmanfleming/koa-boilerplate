@@ -1,5 +1,5 @@
 import { Context, Next } from 'koa';
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY } from 'http-status-codes';
 import logger from '../Logger';
 
 export default async function (ctx: Context, next: Next) {
@@ -7,7 +7,14 @@ export default async function (ctx: Context, next: Next) {
 	try {
 		await next();
 	} catch (ex) {
-		if (ex.status && ex.status !== INTERNAL_SERVER_ERROR) {
+		if (ex.name === 'ValidationError') {
+			ctx.status = UNPROCESSABLE_ENTITY;
+			ctx.body = {
+				errors: {
+					body: ex.details[0].message,
+				},
+			};
+		} else if (ex.status && ex.status !== INTERNAL_SERVER_ERROR) {
 			ctx.status = ex.status;
 			ctx.body = { message: ex.message };
 		} else {

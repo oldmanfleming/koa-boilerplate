@@ -1,7 +1,8 @@
 import middleware from '../../../src/middleware/ErrorMiddleware';
-import { OK, BAD_REQUEST, UNAUTHORIZED } from 'http-status-codes';
+import { OK, BAD_REQUEST, UNAUTHORIZED, UNPROCESSABLE_ENTITY } from 'http-status-codes';
 import logger from '../../../src/Logger';
 import sinon, { SinonSandbox } from 'sinon';
+import { assert, string } from '@hapi/joi';
 
 describe('Error Middleware', () => {
 	const sandbox: SinonSandbox = sinon.createSandbox();
@@ -15,6 +16,17 @@ describe('Error Middleware', () => {
 
 	beforeEach(() => {
 		sandbox.reset();
+	});
+
+	test('Validation errors parsed and return 422', async () => {
+		const next: any = () => assert({}, string());
+		await middleware(mockContext, next);
+		expect(mockContext.status).toBe(UNPROCESSABLE_ENTITY);
+		expect(mockContext.body).toEqual({
+			errors: {
+				body: '"value" must be a string',
+			},
+		});
 	});
 
 	test('Errors caught and status and body are obfuscated with 404 when ex status undefined', async () => {
