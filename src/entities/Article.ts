@@ -4,10 +4,10 @@ import {
 	Column,
 	ManyToOne,
 	OneToMany,
-	JoinColumn,
 	BeforeUpdate,
 	Index,
 	ManyToMany,
+	JoinTable,
 } from 'typeorm';
 import { User } from './User';
 import { Comment } from './Comment';
@@ -31,14 +31,14 @@ export class Article {
 	@Column({ default: '' })
 	body!: string;
 
-	@OneToMany(() => Tag, (tag: Tag) => tag.label, { eager: true })
-	tagList!: string[];
+	@ManyToMany(() => Tag, (tag: Tag) => tag.articles, { eager: true, cascade: true })
+	@JoinTable()
+	tagList!: Tag[];
 
 	@ManyToOne(() => User, (user: User) => user.articles, { eager: true })
 	author!: User;
 
 	@OneToMany(() => Comment, (comment: Comment) => comment.article)
-	@JoinColumn()
 	comments!: Comment[];
 
 	@ManyToMany(() => User)
@@ -53,5 +53,22 @@ export class Article {
 	@BeforeUpdate()
 	updateTimestamp() {
 		this.updatedAt = new Date();
+	}
+
+	toJSON(following: boolean, favorited: boolean, favoritesCount: number) {
+		return {
+			article: {
+				slug: this.slug,
+				title: this.title,
+				description: this.description,
+				body: this.body,
+				tagList: this.tagList.map((tag: Tag) => tag.toJSON()),
+				author: this.author.toProfileJSON(following).profile,
+				createdAt: this.createdAt,
+				updatedAt: this.updatedAt,
+				favorited,
+				favoritesCount,
+			},
+		};
 	}
 }

@@ -90,14 +90,17 @@ export default class UserController {
 	@PUT()
 	@before([inject(AuthenticationMiddleware)])
 	async updateUser(ctx: Context) {
-		object({
-			user: object({
-				username: string().min(5).max(30).required(),
-				email: string().email().required(),
-				bio: string().max(1000),
-				image: string().max(1000),
+		assert(
+			ctx.request.body,
+			object({
+				user: object({
+					username: string().min(5).max(30).required(),
+					email: string().email().required(),
+					bio: string().max(1000),
+					image: string().max(1000),
+				}),
 			}),
-		});
+		);
 		const user: User = ctx.state.user;
 		Object.assign(user, ctx.request.body.user);
 		await this._userRepository.update(user.id, user);
