@@ -53,13 +53,13 @@ export class User {
 		};
 	}
 
-	toProfileJSON(isFollowing: boolean) {
+	toProfileJSON(following: boolean) {
 		return {
 			profile: {
 				username: this.username,
 				bio: this.bio,
 				image: this.image,
-				following: isFollowing,
+				following,
 			},
 		};
 	}
