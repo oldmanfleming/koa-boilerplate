@@ -1,12 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryColumn, ManyToMany } from 'typeorm';
 import { Article } from './Article';
 
 @Entity('tags')
 export class Tag {
-	@PrimaryGeneratedColumn()
-	id!: number;
-
-	@Column()
+	@PrimaryColumn()
 	label!: string;
 
 	@ManyToMany(() => Article, (article: Article) => article.tagList)

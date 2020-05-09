@@ -9,19 +9,20 @@ import ArticleRepository from '../repositories/ArticleRepository';
 import AuthenticationMiddleware from '../middleware/AuthenticationMiddleware';
 import { Article } from '../entities/Article';
 // import FollowRepository from '../repositories/FollowRepository';
-import TagRepository from '../repositories/TagRepository';
+// import TagRepository from '../repositories/TagRepository';
+import { Tag } from '../entities/Tag';
 
 @route('/api/articles')
 export default class ArticleController {
 	private _articleRepository: ArticleRepository;
 	// private _followRepository: FollowRepository;
-	private _tagRepository: TagRepository;
+	// private _tagRepository: TagRepository;
 
 	// Any Dependencies registered to the container can be injected here
 	constructor({ connection }: { connection: Connection }) {
 		this._articleRepository = connection.getCustomRepository(ArticleRepository);
 		// this._followRepository = connection.getCustomRepository(FollowRepository);
-		this._tagRepository = connection.getCustomRepository(TagRepository);
+		// this._tagRepository = connection.getCustomRepository(TagRepository);
 	}
 
 	@route('/')
@@ -46,7 +47,11 @@ export default class ArticleController {
 		article.body = ctx.request.body.article.body;
 		article.slug = slugify(article.title, { lower: true });
 		article.author = ctx.state.user;
-		article.tagList = await this._tagRepository.findOrCreateTags(ctx.request.body.article.tagList);
+		article.tagList = ctx.request.body.article.tagList.map((tagLabel: string) => {
+			const tag: Tag = new Tag();
+			tag.label = tagLabel;
+			return tag;
+		});
 
 		await this._articleRepository.save(article);
 
