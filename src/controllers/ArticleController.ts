@@ -1,4 +1,4 @@
-import { route, POST, before, inject, DELETE, PUT } from 'awilix-koa';
+import { route, POST, before, inject, DELETE, PUT, GET } from 'awilix-koa';
 import { CREATED, NOT_FOUND, OK } from 'http-status-codes';
 import { Context } from 'koa';
 import { Connection } from 'typeorm';
@@ -12,18 +12,22 @@ import FollowRepository from '../repositories/FollowRepository';
 import { Article } from '../entities/Article';
 import { Tag } from '../entities/Tag';
 import { Favorite } from '../entities/Favorite';
+import { Comment } from '../entities/Comment';
+import CommentRepository from '../repositories/CommentRepository';
 
 @route('/api/articles')
 export default class ArticleController {
 	private _articleRepository: ArticleRepository;
 	private _favoriteRepository: FavoriteRepository;
 	private _followRepository: FollowRepository;
+	private _commentRepository: CommentRepository;
 
 	// Any Dependencies registered to the container can be injected here
 	constructor({ connection }: { connection: Connection }) {
 		this._articleRepository = connection.getCustomRepository(ArticleRepository);
 		this._favoriteRepository = connection.getCustomRepository(FavoriteRepository);
 		this._followRepository = connection.getCustomRepository(FollowRepository);
+		this._commentRepository = connection.getCustomRepository(CommentRepository);
 	}
 
 	@route('/')
@@ -57,11 +61,11 @@ export default class ArticleController {
 		await this._articleRepository.save(article);
 
 		const savedArticle: Article = await this._articleRepository.findOneOrFail({
-			relations: ['tagList', 'author'],
+			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: article.slug },
 		});
 
-		ctx.body = savedArticle.toJSON(false, false, 0);
+		ctx.body = { article: savedArticle.toJSON(false, false) };
 		ctx.status = CREATED;
 	}
 
@@ -95,16 +99,37 @@ export default class ArticleController {
 
 		await this._articleRepository.update(article.id, article);
 
-		const favoriteCount: number = await this._favoriteRepository.count({ article });
-		const favorited: number = await this._favoriteRepository.count({ article, user: ctx.state.user });
-		const isFollowing: boolean = await this._followRepository.isFollowing(ctx.state.user, article.author);
 		const updatedArticle: Article = await this._articleRepository.findOneOrFail({
-			relations: ['tagList', 'author'],
+			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: article.slug },
 		});
 
-		ctx.body = updatedArticle.toJSON(isFollowing, !!favorited, favoriteCount);
+		const favorited: boolean = await this._favoriteRepository.favorited(updatedArticle, ctx.state.user);
+		const following: boolean = await this._followRepository.following(ctx.state.user, updatedArticle.author);
+
+		ctx.body = { article: updatedArticle.toJSON(following, favorited) };
 		ctx.status = CREATED;
+	}
+
+	@route('/:slug')
+	@GET()
+	@before([inject(AuthenticationMiddleware)])
+	async getArticle(ctx: Context) {
+		const article: Article | undefined = await this._articleRepository.findOne({
+			relations: ['tagList', 'author', 'favorites'],
+			where: { slug: ctx.params.slug },
+		});
+
+		if (!article) {
+			ctx.status = NOT_FOUND;
+			return;
+		}
+
+		const favorited: boolean = await this._favoriteRepository.favorited(article, ctx.state.user);
+		const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
+
+		ctx.body = { article: article.toJSON(following, favorited) };
+		ctx.status = OK;
 	}
 
 	@route('/:slug')
@@ -123,12 +148,80 @@ export default class ArticleController {
 		ctx.status = OK;
 	}
 
+	@route('/:slug/comments')
+	@POST()
+	@before([inject(AuthenticationMiddleware)])
+	async addComment(ctx: Context) {
+		assert(
+			ctx.request.body,
+			object({
+				comment: object({
+					body: string().max(5000).required(),
+				}),
+			}),
+		);
+
+		const article: Article | undefined = await this._articleRepository.findOne({ slug: ctx.params.slug });
+
+		if (!article) {
+			ctx.status = NOT_FOUND;
+			return;
+		}
+
+		const comment: Comment = new Comment();
+		comment.body = ctx.request.body.comment.body;
+		comment.article = article;
+		comment.author = ctx.state.user;
+
+		await this._commentRepository.save(comment);
+
+		const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
+
+		ctx.body = { comment: comment.toJSON(following) };
+		ctx.status = CREATED;
+	}
+
+	@route('/:slug/comments')
+	@GET()
+	@before([inject(AuthenticationMiddleware)])
+	async getComments(ctx: Context) {
+		const article: Article | undefined = await this._articleRepository.findOne({ slug: ctx.params.slug });
+
+		if (!article) {
+			ctx.status = NOT_FOUND;
+			return;
+		}
+
+		const comments: Comment[] = await this._commentRepository.find({ article });
+
+		const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
+
+		ctx.body = { comments: comments.map((comment: Comment) => comment.toJSON(following)) };
+		ctx.status = OK;
+	}
+
+	@route('/:slug/comments/:id')
+	@DELETE()
+	@before([inject(AuthenticationMiddleware)])
+	async deleteComment(ctx: Context) {
+		const article: Article | undefined = await this._articleRepository.findOne({ slug: ctx.params.slug });
+
+		if (!article) {
+			ctx.status = NOT_FOUND;
+			return;
+		}
+
+		await this._commentRepository.delete(ctx.params.id);
+
+		ctx.status = OK;
+	}
+
 	@route('/:slug/favorite')
 	@POST()
 	@before([inject(AuthenticationMiddleware)])
 	async favoriteArticle(ctx: Context) {
 		const article: Article | undefined = await this._articleRepository.findOneOrFail({
-			relations: ['tagList', 'author'],
+			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: ctx.params.slug },
 		});
 
@@ -147,14 +240,13 @@ export default class ArticleController {
 			favorite.article = article;
 			favorite.user = ctx.state.user;
 			await this._favoriteRepository.save(favorite);
+			article.favorites.push(favorite);
 		}
 
-		const favoriteCount: number = await this._favoriteRepository.count({ article });
-
-		const isFollowing: boolean = await this._followRepository.isFollowing(ctx.state.user, article.author);
+		const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
 
 		ctx.status = CREATED;
-		ctx.body = article.toJSON(isFollowing, true, favoriteCount);
+		ctx.body = { article: article.toJSON(following, true) };
 	}
 
 	@route('/:slug/favorite')
@@ -162,7 +254,7 @@ export default class ArticleController {
 	@before([inject(AuthenticationMiddleware)])
 	async unfavoriteArticle(ctx: Context) {
 		const article: Article | undefined = await this._articleRepository.findOneOrFail({
-			relations: ['tagList', 'author'],
+			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: ctx.params.slug },
 		});
 
@@ -176,11 +268,10 @@ export default class ArticleController {
 			user: ctx.state.user,
 		});
 
-		const favoriteCount: number = await this._favoriteRepository.count({ article });
-
-		const isFollowing: boolean = await this._followRepository.isFollowing(ctx.state.user, article.author);
+		article.favorites.pop();
+		const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
 
 		ctx.status = OK;
-		ctx.body = article.toJSON(isFollowing, false, favoriteCount);
+		ctx.body = { article: article.toJSON(following, false) };
 	}
 }

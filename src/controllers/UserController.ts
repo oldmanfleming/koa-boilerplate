@@ -44,7 +44,7 @@ export default class UserController {
 
 		const token: string = this._securityService.generateToken(user);
 
-		ctx.body = user.toUserJSON(token);
+		ctx.body = { user: user.toUserJSON(token) };
 		ctx.status = CREATED;
 	}
 
@@ -74,7 +74,7 @@ export default class UserController {
 
 		const token: string = this._securityService.generateToken(user);
 
-		ctx.body = user.toUserJSON(token);
+		ctx.body = { user: user.toUserJSON(token) };
 		ctx.status = OK;
 	}
 
@@ -82,7 +82,7 @@ export default class UserController {
 	@GET()
 	@before([inject(AuthenticationMiddleware)])
 	async getCurrentUser(ctx: Context) {
-		ctx.body = ctx.state.user.toUserJSON(ctx.state.token);
+		ctx.body = { user: ctx.state.user.toUserJSON(ctx.state.token) };
 		ctx.status = OK;
 	}
 
@@ -104,7 +104,7 @@ export default class UserController {
 		const user: User = ctx.state.user;
 		Object.assign(user, ctx.request.body.user);
 		await this._userRepository.update(user.id, user);
-		ctx.body = user.toUserJSON(ctx.state.token);
+		ctx.body = { user: user.toUserJSON(ctx.state.token) };
 		ctx.status = OK;
 	}
 }

@@ -56,20 +56,18 @@ export class Article {
 		this.updatedAt = new Date();
 	}
 
-	toJSON(following: boolean, favorited: boolean, favoritesCount: number) {
+	toJSON(following: boolean, favorited: boolean) {
 		return {
-			article: {
-				slug: this.slug,
-				title: this.title,
-				description: this.description,
-				body: this.body,
-				tagList: this.tagList.map((tag: Tag) => tag.toJSON()),
-				author: this.author.toProfileJSON(following).profile,
-				createdAt: this.createdAt,
-				updatedAt: this.updatedAt,
-				favorited,
-				favoritesCount,
-			},
+			slug: this.slug,
+			title: this.title,
+			description: this.description,
+			body: this.body,
+			tagList: this.tagList.map((tag: Tag) => tag.toJSON()),
+			author: this.author.toProfileJSON(following),
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+			favorited,
+			favoritesCount: this.favorites.length,
 		};
 	}
 }

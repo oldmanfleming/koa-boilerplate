@@ -26,4 +26,14 @@ export class Comment {
 	updateTimestamp() {
 		this.updatedAt = new Date();
 	}
+
+	toJSON(following: boolean) {
+		return {
+			id: this.id,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt,
+			body: this.body,
+			author: this.author.toProfileJSON(following),
+		};
+	}
 }

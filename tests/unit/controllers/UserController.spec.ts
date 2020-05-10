@@ -120,7 +120,7 @@ describe('User Controller', () => {
 		expect(mockVerifyHash.getCall(0).args[1]).toEqual(password);
 		expect(mockSecurityService.generateToken.getCall(0).args[0]).toEqual(user);
 		expect(mockContext.status).toEqual(OK);
-		expect(mockContext.body).toEqual(user.toUserJSON(token));
+		expect(mockContext.body).toEqual({ user: user.toUserJSON(token) });
 	});
 
 	test('login throws when user is not found', async () => {
@@ -182,7 +182,7 @@ describe('User Controller', () => {
 		await controller.getCurrentUser(mockContext);
 
 		expect(mockContext.status).toEqual(OK);
-		expect(mockContext.body).toEqual(user.toUserJSON(token));
+		expect(mockContext.body).toEqual({ user: user.toUserJSON(token) });
 	});
 
 	test('Update User takes user from state, assigns new props and calls update in user repo', async () => {

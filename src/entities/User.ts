@@ -43,24 +43,20 @@ export class User {
 
 	toUserJSON(token: string) {
 		return {
-			user: {
-				email: this.email,
-				username: this.username,
-				bio: this.bio,
-				image: this.image,
-				token,
-			},
+			email: this.email,
+			username: this.username,
+			bio: this.bio,
+			image: this.image,
+			token,
 		};
 	}
 
 	toProfileJSON(following: boolean) {
 		return {
-			profile: {
-				username: this.username,
-				bio: this.bio,
-				image: this.image,
-				following,
-			},
+			username: this.username,
+			bio: this.bio,
+			image: this.image,
+			following,
 		};
 	}
 }

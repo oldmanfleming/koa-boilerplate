@@ -31,9 +31,9 @@ export default class ProfileController {
 			return;
 		}
 
-		const isFollowing: boolean = await this._followRepository.isFollowing(ctx.state.user, user);
+		const following: boolean = await this._followRepository.following(ctx.state.user, user);
 
-		ctx.body = user.toProfileJSON(isFollowing);
+		ctx.body = { profile: user.toProfileJSON(following) };
 		ctx.status = OK;
 	}
 
@@ -48,21 +48,16 @@ export default class ProfileController {
 			return;
 		}
 
-		const isFollowing: boolean = await this._followRepository.isFollowing(ctx.state.user, user);
+		const following: boolean = await this._followRepository.following(ctx.state.user, user);
 
-		if (isFollowing) {
-			ctx.body = user.toProfileJSON(true);
-			ctx.status = OK;
-			return;
+		if (!following) {
+			const follow: Follow = new Follow();
+			follow.follower = ctx.state.user;
+			follow.following = user;
+			await this._followRepository.save(follow);
 		}
 
-		const follow: Follow = new Follow();
-		follow.follower = ctx.state.user;
-		follow.following = user;
-
-		await this._followRepository.save(follow);
-
-		ctx.body = user.toProfileJSON(true);
+		ctx.body = { profile: user.toProfileJSON(true) };
 		ctx.status = OK;
 	}
 
@@ -79,7 +74,7 @@ export default class ProfileController {
 
 		await this._followRepository.delete({ following: user, follower: ctx.state.user });
 
-		ctx.body = user.toProfileJSON(false);
+		ctx.body = { profile: user.toProfileJSON(false) };
 		ctx.status = OK;
 	}
 }
