@@ -1,7 +1,7 @@
 import { route, POST, before, inject, DELETE, PUT, GET } from 'awilix-koa';
 import { CREATED, NOT_FOUND, OK } from 'http-status-codes';
 import { Context } from 'koa';
-import { Connection } from 'typeorm';
+import { Connection, SelectQueryBuilder, In } from 'typeorm';
 import { assert, object, string, array } from '@hapi/joi';
 import slugify from 'slugify';
 
@@ -14,6 +14,9 @@ import { Tag } from '../entities/Tag';
 import { Favorite } from '../entities/Favorite';
 import { Comment } from '../entities/Comment';
 import CommentRepository from '../repositories/CommentRepository';
+import { User } from '../entities/User';
+import UserRepository from '../repositories/UserRepository';
+import { Follow } from '../entities/Follow';
 
 @route('/api/articles')
 export default class ArticleController {
@@ -21,6 +24,7 @@ export default class ArticleController {
 	private _favoriteRepository: FavoriteRepository;
 	private _followRepository: FollowRepository;
 	private _commentRepository: CommentRepository;
+	private _userRepository: UserRepository;
 
 	// Any Dependencies registered to the container can be injected here
 	constructor({ connection }: { connection: Connection }) {
@@ -28,6 +32,7 @@ export default class ArticleController {
 		this._favoriteRepository = connection.getCustomRepository(FavoriteRepository);
 		this._followRepository = connection.getCustomRepository(FollowRepository);
 		this._commentRepository = connection.getCustomRepository(CommentRepository);
+		this._userRepository = connection.getCustomRepository(UserRepository);
 	}
 
 	@route('/')
@@ -67,6 +72,108 @@ export default class ArticleController {
 
 		ctx.body = { article: savedArticle.toJSON(false, false) };
 		ctx.status = CREATED;
+	}
+
+	@route('/')
+	@GET()
+	@before([inject((params: any) => AuthenticationMiddleware(params, false))])
+	async getArticles(ctx: Context) {
+		const filterQuery: SelectQueryBuilder<Article> = this._articleRepository
+			.createQueryBuilder('article')
+			.select(['article.id'])
+			.leftJoin('article.author', 'author')
+			.leftJoin('article.tagList', 'tagList')
+			.leftJoin('article.favorites', 'favorites');
+
+		filterQuery.where('1 = 1');
+
+		if (ctx.query.tag) {
+			filterQuery.andWhere('tagList.label LIKE :tag', { tag: `%${ctx.query.tag}%` });
+		}
+
+		if (ctx.query.favorited) {
+			const user: User | undefined = await this._userRepository.findOne({ username: ctx.query.favorited });
+			if (user) {
+				filterQuery.andWhere('favorites."userId" = :userId', { userId: user.id });
+			}
+		}
+
+		if (ctx.query.author) {
+			filterQuery.andWhere('author.username = :username', { username: ctx.query.author });
+		}
+
+		await this.getArticlesByFilteredIds(ctx, filterQuery);
+	}
+
+	@route('/feed')
+	@GET()
+	@before([inject(AuthenticationMiddleware)])
+	async getArticleFeed(ctx: Context) {
+		const following: Follow[] = await this._followRepository.find({
+			relations: ['following'],
+			where: { follower: ctx.state.user },
+		});
+
+		if (!following.length) {
+			ctx.body = { articles: [], articlesCount: 0 };
+			ctx.status = OK;
+			return;
+		}
+
+		const filterQuery: SelectQueryBuilder<Article> = this._articleRepository
+			.createQueryBuilder('article')
+			.select(['article.id'])
+			.leftJoin('article.author', 'author')
+			.where('article."authorId" IN (:...authors)', {
+				authors: following.map((follow: Follow) => follow.following.id),
+			});
+
+		await this.getArticlesByFilteredIds(ctx, filterQuery);
+	}
+
+	async getArticlesByFilteredIds(ctx: Context, filterQuery: SelectQueryBuilder<Article>) {
+		const articlesCount: number = await filterQuery.getCount();
+
+		if (!articlesCount) {
+			ctx.body = { articles: [], articlesCount: 0 };
+			ctx.status = OK;
+			return;
+		}
+
+		const filteredIds: any[] = await filterQuery.getRawMany();
+
+		const query: SelectQueryBuilder<Article> = this._articleRepository
+			.createQueryBuilder('article')
+			.leftJoinAndSelect('article.author', 'author')
+			.leftJoinAndSelect('article.tagList', 'tagList')
+			.leftJoinAndSelect('article.favorites', 'favorites');
+
+		query.where({ id: In(filteredIds.map((article: any) => article.article_id)) });
+
+		query.orderBy('article.createdAt', 'DESC');
+
+		if (ctx.query.limit) {
+			query.take(ctx.query.limit);
+		}
+
+		if (ctx.query.offset) {
+			console.log(ctx.query.offset);
+			query.skip(ctx.query.offset);
+		}
+
+		const filteredArticles: Article[] = await query.getMany();
+
+		const articles: object[] = [];
+		await Promise.all(
+			filteredArticles.map(async (article: Article) => {
+				const favorited: boolean = await this._favoriteRepository.favorited(article, ctx.state.user);
+				const following: boolean = await this._followRepository.following(ctx.state.user, article.author);
+				articles.push(article.toJSON(following, favorited));
+			}),
+		);
+
+		ctx.body = { articles, articlesCount };
+		ctx.status = OK;
 	}
 
 	@route('/:slug')

@@ -6,18 +6,25 @@ import SecurityService, { Claims } from '../services/SecurityService';
 import UserRepository from '../repositories/UserRepository';
 import { User } from '../entities/User';
 
-export default function ({
-	connection,
-	securityService,
-}: {
-	connection: Connection;
-	securityService: SecurityService;
-}) {
+export default function (
+	{
+		connection,
+		securityService,
+	}: {
+		connection: Connection;
+		securityService: SecurityService;
+	},
+	authRequired: boolean = true,
+) {
 	return async function (ctx: Context, next: Next) {
 		const { authorization }: { authorization: string } = ctx.header;
 
 		if (!authorization) {
-			ctx.throw(UNAUTHORIZED, 'Unauthorized');
+			if (!authRequired) {
+				return next();
+			} else {
+				ctx.throw(UNAUTHORIZED, 'Unauthorized');
+			}
 		}
 
 		const [tokenType, token]: string[] = authorization.split(' ');

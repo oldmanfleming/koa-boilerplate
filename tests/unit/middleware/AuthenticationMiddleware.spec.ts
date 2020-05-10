@@ -56,6 +56,16 @@ describe('Auth Middleware', () => {
 		expect(mockContext.throw.getCall(0).args[0]).toBe(UNAUTHORIZED);
 	});
 
+	test('Does not throw when auth is optional and no auth header', async () => {
+		const middlewareWithAuthOptional: Function = AuthenticationMiddleware(
+			{ connection: mockConnection, securityService: mockSecurity },
+			false,
+		);
+		mockContext.header.authorization = undefined;
+		await middlewareWithAuthOptional(mockContext, mockNext);
+		expect(mockNext.callCount).toBe(1);
+	});
+
 	test('Throws unauthorized when token type does not match bearer or token', async () => {
 		mockContext.header.authorization = 'basic some-token';
 		expect(middleware(mockContext, mockNext)).rejects.toThrow();
