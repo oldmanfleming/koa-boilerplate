@@ -12,6 +12,7 @@ import {
 import { User } from './User';
 import { Comment } from './Comment';
 import { Tag } from './Tag';
+import { Favorite } from './Favorite';
 
 @Entity('articles')
 export class Article {
@@ -31,18 +32,18 @@ export class Article {
 	@Column({ default: '' })
 	body!: string;
 
-	@ManyToMany(() => Tag, (tag: Tag) => tag.articles, { eager: true, cascade: true })
+	@ManyToMany(() => Tag, (tag: Tag) => tag.articles, { cascade: true })
 	@JoinTable()
 	tagList!: Tag[];
 
-	@ManyToOne(() => User, (user: User) => user.articles, { eager: true })
+	@ManyToOne(() => User, (user: User) => user.articles)
 	author!: User;
 
 	@OneToMany(() => Comment, (comment: Comment) => comment.article)
 	comments!: Comment[];
 
-	@ManyToMany(() => User)
-	favorites!: User[];
+	@OneToMany(() => Favorite, (favorite: Favorite) => favorite.article)
+	favorites!: Favorite[];
 
 	@Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
 	createdAt!: Date;

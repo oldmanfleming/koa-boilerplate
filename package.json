@@ -14,9 +14,8 @@
 		"url": "https://github.com/eflem00/koa-boilerplate/issues"
 	},
 	"scripts": {
-		"build": "tsc",
-		"clean": "rimraf ./build",
-		"commit": "npm-run-all clean build lint unittest docker:up inttest docker:down",
+		"build": "rimraf ./build && tsc",
+		"commit": "npm-run-all build lint unittest docker:up inttest docker:down",
 		"coveralls": "cat ./coverage/lcov.info | coveralls",
 		"inttest": "jest --testPathPattern=tests/integration/.*.spec.ts",
 		"inttest:watch": "jest --watchAll --testPathPattern=tests/integration/.*.spec.ts",

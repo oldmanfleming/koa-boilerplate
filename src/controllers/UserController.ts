@@ -94,8 +94,8 @@ export default class UserController {
 			ctx.request.body,
 			object({
 				user: object({
-					username: string().min(5).max(30).required(),
-					email: string().email().required(),
+					username: string().min(5).max(30),
+					email: string().email(),
 					bio: string().max(1000),
 					image: string().max(1000),
 				}),

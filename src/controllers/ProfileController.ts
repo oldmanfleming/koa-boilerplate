@@ -83,7 +83,3 @@ export default class ProfileController {
 		ctx.status = OK;
 	}
 }
-
-// await this._connection.transaction(async (tx: EntityManager) => {
-// 	await tx.save(user);
-// });
