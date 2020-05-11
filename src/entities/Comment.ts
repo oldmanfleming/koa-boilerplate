@@ -33,7 +33,7 @@ export class Comment {
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
 			body: this.body,
-			author: this.author.toProfileJSON(following),
+			author: this.author && this.author.toProfileJSON(following),
 		};
 	}
 }

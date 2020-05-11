@@ -1,4 +1,6 @@
-import AuthenticationMiddleware from '../../../src/middleware/AuthenticationMiddleware';
+import AuthenticationMiddleware, {
+	OptionalAuthenticationMiddleware,
+} from '../../../src/middleware/AuthenticationMiddleware';
 import { User } from '../../../src/entities/User';
 // import { UNAUTHORIZED } from 'http-status-codes';
 import sinon, { SinonSandbox } from 'sinon';
@@ -29,6 +31,18 @@ describe('Auth Middleware', () => {
 			state: {},
 			throw: sandbox.stub().throws(),
 		};
+	});
+
+	test('optional authentication invokes Auth Middleware with authRequired set to false', async () => {
+		const middleware: Function = OptionalAuthenticationMiddleware({
+			connection: mockConnection,
+			securityService: mockSecurity,
+		});
+		mockContext.header.authorization = undefined;
+
+		await middleware(mockContext, mockNext);
+
+		expect(mockNext.callCount).toEqual(1);
 	});
 
 	test.each([

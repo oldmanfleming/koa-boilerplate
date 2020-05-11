@@ -6,7 +6,7 @@ import SecurityService, { Claims } from '../services/SecurityService';
 import UserRepository from '../repositories/UserRepository';
 import { User } from '../entities/User';
 
-export default function (
+export default function AuthenticationMiddleware(
 	{
 		connection,
 		securityService,
@@ -49,4 +49,8 @@ export default function (
 		ctx.state.token = token;
 		return next();
 	};
+}
+
+export function OptionalAuthenticationMiddleware(params: any) {
+	return AuthenticationMiddleware(params, false);
 }

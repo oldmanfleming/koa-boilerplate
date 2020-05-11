@@ -5,7 +5,7 @@ import { Connection, SelectQueryBuilder, In } from 'typeorm';
 import { assert, object, string, array } from '@hapi/joi';
 import slugify from 'slugify';
 
-import AuthenticationMiddleware from '../middleware/AuthenticationMiddleware';
+import AuthenticationMiddleware, { OptionalAuthenticationMiddleware } from '../middleware/AuthenticationMiddleware';
 import ArticleRepository from '../repositories/ArticleRepository';
 import FavoriteRepository from '../repositories/FavoriteRepository';
 import FollowRepository from '../repositories/FollowRepository';
@@ -74,9 +74,35 @@ export default class ArticleController {
 		ctx.status = CREATED;
 	}
 
+	@route('/feed')
+	@GET()
+	@before([inject(AuthenticationMiddleware)])
+	async getArticleFeed(ctx: Context) {
+		const following: Follow[] = await this._followRepository.find({
+			relations: ['following'],
+			where: { follower: ctx.state.user },
+		});
+
+		if (!following.length) {
+			ctx.body = { articles: [], articlesCount: 0 };
+			ctx.status = OK;
+			return;
+		}
+
+		const filterQuery: SelectQueryBuilder<Article> = this._articleRepository
+			.createQueryBuilder('article')
+			.select(['article.id'])
+			.leftJoin('article.author', 'author')
+			.where('article."authorId" IN (:...authors)', {
+				authors: following.map((follow: Follow) => follow.following.id),
+			});
+
+		await this.getArticlesByFilteredIds(ctx, filterQuery);
+	}
+
 	@route('/')
 	@GET()
-	@before([inject((params: any) => AuthenticationMiddleware(params, false))])
+	@before([inject(OptionalAuthenticationMiddleware)])
 	async getArticles(ctx: Context) {
 		const filterQuery: SelectQueryBuilder<Article> = this._articleRepository
 			.createQueryBuilder('article')
@@ -101,32 +127,6 @@ export default class ArticleController {
 		if (ctx.query.author) {
 			filterQuery.andWhere('author.username = :username', { username: ctx.query.author });
 		}
-
-		await this.getArticlesByFilteredIds(ctx, filterQuery);
-	}
-
-	@route('/feed')
-	@GET()
-	@before([inject(AuthenticationMiddleware)])
-	async getArticleFeed(ctx: Context) {
-		const following: Follow[] = await this._followRepository.find({
-			relations: ['following'],
-			where: { follower: ctx.state.user },
-		});
-
-		if (!following.length) {
-			ctx.body = { articles: [], articlesCount: 0 };
-			ctx.status = OK;
-			return;
-		}
-
-		const filterQuery: SelectQueryBuilder<Article> = this._articleRepository
-			.createQueryBuilder('article')
-			.select(['article.id'])
-			.leftJoin('article.author', 'author')
-			.where('article."authorId" IN (:...authors)', {
-				authors: following.map((follow: Follow) => follow.following.id),
-			});
 
 		await this.getArticlesByFilteredIds(ctx, filterQuery);
 	}
@@ -157,7 +157,6 @@ export default class ArticleController {
 		}
 
 		if (ctx.query.offset) {
-			console.log(ctx.query.offset);
 			query.skip(ctx.query.offset);
 		}
 
@@ -327,7 +326,7 @@ export default class ArticleController {
 	@POST()
 	@before([inject(AuthenticationMiddleware)])
 	async favoriteArticle(ctx: Context) {
-		const article: Article | undefined = await this._articleRepository.findOneOrFail({
+		const article: Article | undefined = await this._articleRepository.findOne({
 			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: ctx.params.slug },
 		});
@@ -360,7 +359,7 @@ export default class ArticleController {
 	@DELETE()
 	@before([inject(AuthenticationMiddleware)])
 	async unfavoriteArticle(ctx: Context) {
-		const article: Article | undefined = await this._articleRepository.findOneOrFail({
+		const article: Article | undefined = await this._articleRepository.findOne({
 			relations: ['tagList', 'author', 'favorites'],
 			where: { slug: ctx.params.slug },
 		});

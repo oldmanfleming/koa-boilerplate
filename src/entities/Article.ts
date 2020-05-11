@@ -62,12 +62,12 @@ export class Article {
 			title: this.title,
 			description: this.description,
 			body: this.body,
-			tagList: this.tagList.map((tag: Tag) => tag.toJSON()),
-			author: this.author.toProfileJSON(following),
+			tagList: this.tagList && this.tagList.map((tag: Tag) => tag.toJSON()),
+			author: this.author && this.author.toProfileJSON(following),
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
 			favorited,
-			favoritesCount: this.favorites.length,
+			favoritesCount: this.favorites && this.favorites.length,
 		};
 	}
 }
