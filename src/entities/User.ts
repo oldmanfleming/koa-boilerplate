@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Index, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Index, Column, OneToMany } from 'typeorm';
 import { Article } from './Article';
 import { Comment } from './Comment';
 import { Follow } from './Follow';
+import { Favorite } from './Favorite';
 
 @Entity('users')
 export class User {
@@ -31,9 +32,8 @@ export class User {
 	@OneToMany(() => Comment, (comment: Comment) => comment.author)
 	comments!: Comment[];
 
-	@ManyToMany(() => Article)
-	@JoinTable()
-	favorites!: Article[];
+	@OneToMany(() => Favorite, (favorite: Favorite) => favorite.user)
+	favorites!: Favorite[];
 
 	@OneToMany(() => Follow, (follow: Follow) => follow.follower)
 	followers!: Follow[];
@@ -43,24 +43,20 @@ export class User {
 
 	toUserJSON(token: string) {
 		return {
-			user: {
-				email: this.email,
-				username: this.username,
-				bio: this.bio,
-				image: this.image,
-				token,
-			},
+			email: this.email,
+			username: this.username,
+			bio: this.bio,
+			image: this.image,
+			token,
 		};
 	}
 
 	toProfileJSON(following: boolean) {
 		return {
-			profile: {
-				username: this.username,
-				bio: this.bio,
-				image: this.image,
-				following,
-			},
+			username: this.username,
+			bio: this.bio,
+			image: this.image,
+			following,
 		};
 	}
 }

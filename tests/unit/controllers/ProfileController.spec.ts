@@ -7,7 +7,7 @@ describe('ProfileController', () => {
 	const sandbox: any = sinon.createSandbox();
 
 	const mockUserRepository: any = { findOne: sandbox.stub() };
-	const mockFollowRepository: any = { isFollowing: sandbox.stub(), save: sandbox.stub(), delete: sandbox.stub() };
+	const mockFollowRepository: any = { following: sandbox.stub(), save: sandbox.stub(), delete: sandbox.stub() };
 	const mockGetCustomRepository: any = sandbox.stub();
 	const mockConnection: any = {
 		getCustomRepository: mockGetCustomRepository,
@@ -43,12 +43,12 @@ describe('ProfileController', () => {
 		'getProfile returns 200 and following user with result of isFollowing',
 		async (isFollowing: boolean) => {
 			mockUserRepository.findOne.withArgs({ username: followingUsername }).resolves(following);
-			mockFollowRepository.isFollowing.withArgs(follower, following).resolves(isFollowing);
+			mockFollowRepository.following.withArgs(follower, following).resolves(isFollowing);
 
 			await controller.getProfile(mockContext);
 
 			expect(mockContext.status).toEqual(OK);
-			expect(mockContext.body).toEqual(following.toProfileJSON(isFollowing));
+			expect(mockContext.body).toEqual({ profile: following.toProfileJSON(isFollowing) });
 		},
 	);
 
@@ -65,12 +65,12 @@ describe('ProfileController', () => {
 		'followUser returns following user with result of isFollowing and only saves if wasnt following before',
 		async (isFollowing: boolean) => {
 			mockUserRepository.findOne.withArgs({ username: followingUsername }).resolves(following);
-			mockFollowRepository.isFollowing.withArgs(follower, following).resolves(isFollowing);
+			mockFollowRepository.following.withArgs(follower, following).resolves(isFollowing);
 
 			await controller.followUser(mockContext);
 
 			expect(mockContext.status).toEqual(OK);
-			expect(mockContext.body).toEqual(following.toProfileJSON(true));
+			expect(mockContext.body).toEqual({ profile: following.toProfileJSON(true) });
 
 			if (isFollowing) {
 				expect(mockFollowRepository.save.callCount).toEqual(0);
@@ -95,7 +95,7 @@ describe('ProfileController', () => {
 		await controller.unfollowUser(mockContext);
 
 		expect(mockContext.status).toEqual(OK);
-		expect(mockContext.body).toEqual(following.toProfileJSON(false));
+		expect(mockContext.body).toEqual({ profile: following.toProfileJSON(false) });
 		expect(mockFollowRepository.delete.callCount).toEqual(1);
 		expect(mockFollowRepository.delete.getCall(0).args[0]).toEqual({ following, follower });
 	});

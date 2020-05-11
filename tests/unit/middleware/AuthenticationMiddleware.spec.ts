@@ -1,4 +1,6 @@
-import AuthenticationMiddleware from '../../../src/middleware/AuthenticationMiddleware';
+import AuthenticationMiddleware, {
+	OptionalAuthenticationMiddleware,
+} from '../../../src/middleware/AuthenticationMiddleware';
 import { User } from '../../../src/entities/User';
 // import { UNAUTHORIZED } from 'http-status-codes';
 import sinon, { SinonSandbox } from 'sinon';
@@ -31,6 +33,18 @@ describe('Auth Middleware', () => {
 		};
 	});
 
+	test('optional authentication invokes Auth Middleware with authRequired set to false', async () => {
+		const middleware: Function = OptionalAuthenticationMiddleware({
+			connection: mockConnection,
+			securityService: mockSecurity,
+		});
+		mockContext.header.authorization = undefined;
+
+		await middleware(mockContext, mockNext);
+
+		expect(mockNext.callCount).toEqual(1);
+	});
+
 	test.each([
 		['bearer', 'some-token'],
 		['token', 'some-other-token'],
@@ -54,6 +68,16 @@ describe('Auth Middleware', () => {
 		expect(middleware(mockContext, mockNext)).rejects.toThrow();
 		expect(mockNext.callCount).toBe(0);
 		expect(mockContext.throw.getCall(0).args[0]).toBe(UNAUTHORIZED);
+	});
+
+	test('Does not throw when auth is optional and no auth header', async () => {
+		const middlewareWithAuthOptional: Function = AuthenticationMiddleware(
+			{ connection: mockConnection, securityService: mockSecurity },
+			false,
+		);
+		mockContext.header.authorization = undefined;
+		await middlewareWithAuthOptional(mockContext, mockNext);
+		expect(mockNext.callCount).toBe(1);
 	});
 
 	test('Throws unauthorized when token type does not match bearer or token', async () => {
