@@ -9,7 +9,7 @@ services:
 
   migrations:
     build: .
-    command: ['./wait-for-it.sh', 'database:5432', '--', 'npm', 'run', 'migration:run']
+    command: bash -c "node wait 2000 && npx typeorm migration:run"
     depends_on:
       - database
     environment:

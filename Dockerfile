@@ -7,9 +7,7 @@ ENV PORT 3000
 
 COPY package*.json ./
 COPY build ./
-COPY scripts/wait-for-it.sh ./
-
-RUN chmod +x ./wait-for-it.sh
+COPY scripts ./
 
 RUN npm ci --only=production
 

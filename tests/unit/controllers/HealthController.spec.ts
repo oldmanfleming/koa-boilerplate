@@ -1,10 +1,10 @@
-import HealthCheckController from '../../../src/controllers/HealthCheckController';
+import HealthController from '../../../src/controllers/HealthController';
 import { OK } from 'http-status-codes';
 
 const mockConnection: any = { query: jest.fn() };
-const controller: HealthCheckController = new HealthCheckController({ connection: mockConnection });
+const controller: HealthController = new HealthController({ connection: mockConnection });
 
-describe('HealthCheck Controller', () => {
+describe('Health Controller', () => {
 	test('health calls query and returns OK', async () => {
 		const mockContext: any = {};
 		await controller.health(mockContext);

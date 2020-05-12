@@ -15,17 +15,17 @@
 	},
 	"scripts": {
 		"build": "rimraf ./build && tsc",
-		"commit": "npm-run-all build lint unittest docker:up inttest docker:down",
+		"commit": "npm-run-all build lint unittest docker:up wait integrationtest docker:down",
 		"coveralls": "cat ./coverage/lcov.info | coveralls",
-		"inttest": "jest --testPathPattern=tests/integration/.*.spec.ts",
-		"inttest:watch": "jest --watchAll --testPathPattern=tests/integration/.*.spec.ts",
+		"integrationtest": "jest --testPathPattern=tests/integration/.*.spec.ts",
+		"integrationtest:watch": "jest --watchAll --testPathPattern=tests/integration/.*.spec.ts",
 		"lint": "eslint . --ext .ts",
-		"migration:run": "typeorm migration:run",
 		"docker:up": "docker-compose up --force-recreate --build -d",
 		"docker:down": "docker-compose down",
 		"start:dev": "nodemon --watch \"src/**/*.ts\" --exec \"ts-node\" src/Server.ts",
 		"unittest": "jest  --collectCoverage --testPathPattern=tests/unit/.*.spec.ts",
-		"unittest:watch": "jest --watchAll --testPathPattern=tests/unit/.*.spec.ts"
+		"unittest:watch": "jest --watchAll --testPathPattern=tests/unit/.*.spec.ts",
+		"wait": "node scripts/wait 3000"
 	},
 	"jest": {
 		"moduleFileExtensions": [
@@ -84,7 +84,8 @@
 	"eslintIgnore": [
 		"node_modules",
 		"build",
-		"coverage"
+		"coverage",
+		"scripts"
 	],
 	"dependencies": {
 		"@hapi/joi": "^17.1.1",
@@ -96,6 +97,7 @@
 		"kcors": "^2.2.2",
 		"koa": "^2.11.0",
 		"koa-bodyparser": "^4.3.0",
+		"koa-helmet": "^5.2.0",
 		"pg": "^8.0.0",
 		"reflect-metadata": "^0.1.13",
 		"slugify": "^1.4.0",
