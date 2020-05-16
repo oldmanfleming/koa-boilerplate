@@ -1,11 +1,10 @@
-import request from 'supertest';
+import request, { SuperTest, Test } from 'supertest';
 import { OK } from 'http-status-codes';
-import Helper from '../Helper';
 
 describe('Health Controller', () => {
-	const helper: Helper = new Helper();
+	const api: SuperTest<Test> = request('localhost:3000');
 
 	test.each([['/'], ['/health']])('returns 200 on both health paths', async (route: string) => {
-		await request(helper.basePath).get(route).expect(OK);
+		await api.get(route).expect(OK);
 	});
 });

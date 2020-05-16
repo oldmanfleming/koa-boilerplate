@@ -17,13 +17,13 @@
 - 🚚 CI/CD Pipelines With Travis
 - 🔒 JWT Auth and Password Hashing
 - 📜 Environment Specific With Dotenv
-- 🧭 Realworld Example Implementation
 - ⛔ Joi For Request Validation
 - 🎀 Cleaner Code With ESLint And Prettier
+- 🧭 Realworld Example Implementation
+- 💣 Ejection script to remove example code
 
 ## **Coming Soon**
 
-- 💣 Ejection script to remove example code
 - 🛵 Generator scripts to add controllers, middleware and services with tests
 - 🧪 More integration test coverage
 
@@ -31,6 +31,7 @@
 
 - [Prerequisites](#prerequisites)
 - [Local Setup](#local)
+- [Ejection](#ejection)
 - [Commands](#commands)
 - [External Docs](#docs)
 - [Project Structure](#structure)
@@ -103,6 +104,14 @@
     - Docker Build
     - Integration Tests
 
+## **Ejection**
+
+```
+npm run eject
+```
+
+Removes the Realworld Example Code, Updates the Initial Migration while maintaining full code coverage
+
 ## **Commands**
 
 1.  **npm scripts**
@@ -113,6 +122,7 @@
 
     - `start:dev` Run typescript files directly using nodemon and tsnode. Detects changes and automatically restarts server
     - `build` Runs tsc to compile the app. Files are emitted to /build.
+    - `eject` Removes example code
     - `lint` Checks for linting errors using ESLint configuration
     - `unittest` Run jest unittests with code coverage
     - `unittest:watch` Detects changes and automatically re-runs tests
